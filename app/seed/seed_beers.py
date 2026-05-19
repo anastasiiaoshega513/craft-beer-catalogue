@@ -1,0 +1,39 @@
+import asyncio
+import json
+from decimal import Decimal
+from pathlib import Path
+
+from sqlalchemy import delete
+
+from db.engine import AsyncSessionLocal
+from app.models.beer import Beer, BeerTypeEnum
+
+
+async def seed_beers() -> None:
+    file_path = Path(__file__).parent / "beers_seed.json"
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        beers_data = json.load(file)
+
+    async with AsyncSessionLocal() as session:
+        await session.execute(delete(Beer))
+
+        for item in beers_data:
+            beer = Beer(
+                name=item["name"],
+                description=item["description"],
+                price=Decimal(str(item["price"])),
+                image_url=item["image_url"],
+                alcohol_percentage=Decimal(str(item["alcohol_percentage"])),
+                is_filtered=item["is_filtered"],
+                beer_type=BeerTypeEnum[item["beer_type"]],
+                volume=item["volume"],
+                total_amount=item["total_amount"],
+            )
+            session.add(beer)
+
+        await session.commit()
+
+
+if __name__ == "__main__":
+    asyncio.run(seed_beers())
