@@ -1,13 +1,7 @@
-from enum import StrEnum, auto
-
 from sqlalchemy import Column, Integer, String, Text, Numeric, Enum, Boolean
 
 from db.engine import Base
-
-
-class BeerTypeEnum(StrEnum):
-    DARK = auto()
-    LIGHT = auto()
+from app.dependencies.enums import BeerTypeEnum
 
 
 class Beer(Base):
