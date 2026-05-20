@@ -10,7 +10,7 @@ class BeerBaseSchema(BaseModel):
 
     name: str
     price: Decimal
-    image_url: str
+    image_url: str | None = None
     alcohol_percentage: Decimal
     is_filtered: bool
     beer_type: BeerTypeEnum
@@ -18,8 +18,14 @@ class BeerBaseSchema(BaseModel):
     is_available: bool
 
 
-class BeerListSchema(BeerBaseSchema):
-    pass
+class BeerListItemSchema(BeerBaseSchema):
+    id: int
+
+
+class BeerListSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    beers: list[BeerListItemSchema]
 
 
 class BeerDetailSchema(BeerBaseSchema):
