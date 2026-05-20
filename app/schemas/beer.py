@@ -8,6 +8,7 @@ from app.dependencies.enums import BeerTypeEnum
 class BeerBaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
     name: str
     price: Decimal
     image_url: str | None = None
@@ -19,7 +20,7 @@ class BeerBaseSchema(BaseModel):
 
 
 class BeerListItemSchema(BeerBaseSchema):
-    id: int
+    pass
 
 
 class BeerListSchema(BaseModel):
@@ -30,5 +31,4 @@ class BeerListSchema(BaseModel):
 
 class BeerDetailSchema(BeerBaseSchema):
 
-    id: int
     description: str
