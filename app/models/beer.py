@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Numeric, Enum, Boolean
+from sqlalchemy import Column, Integer, String, Text, Numeric, Enum, Boolean, CheckConstraint
 
 from db.engine import Base
 from app.dependencies.enums import BeerTypeEnum
@@ -6,6 +6,10 @@ from app.dependencies.enums import BeerTypeEnum
 
 class Beer(Base):
     __tablename__ = "beers"
+
+    __table_args__ = (
+        CheckConstraint("total_amount >= 0", name="check_total_amount_non_negative"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, unique=True)
@@ -18,6 +22,10 @@ class Beer(Base):
     beer_type = Column(Enum(BeerTypeEnum), nullable=False)
     volume = Column(Integer, nullable=False)
     total_amount = Column(Integer, nullable=False, default=0)
+
+    @property
+    def is_available(self) -> bool:
+        return self.total_amount > 0
 
 
     def __repr__(self):
