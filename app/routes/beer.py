@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,9 +13,28 @@ router = APIRouter(
 
 
 @router.get("/", response_model=BeerListSchema)
-async def get_beer_list(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Beer))
+async def get_beer_list(
+        offset: int = Query(0, ge=0),
+        db: AsyncSession = Depends(get_db)
+):
+    limit = 6
+
+    result = await db.execute(
+        select(Beer)
+        .order_by(Beer.id)
+        .offset(offset)
+        .limit(limit + 1)
+    )
+
     beers = result.scalars().all()
 
-    return {"beers": beers}
+    if len(beers) > limit:
+        beers = beers[:limit]
+        next_offset = offset + limit
+    else:
+        next_offset = None
 
+    return {
+        "beers": beers,
+        "next_offset": next_offset,
+    }

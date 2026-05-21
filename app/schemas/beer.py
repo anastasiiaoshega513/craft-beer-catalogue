@@ -27,6 +27,7 @@ class BeerListSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     beers: list[BeerListItemSchema]
+    next_offset: int | None = None
 
 
 class BeerDetailSchema(BeerBaseSchema):
