@@ -1,14 +1,14 @@
 [
   {
-    "name": "Amber Dawn Lager",
-    "description": "Light craft lager with soft malt sweetness and a clean crisp finish.",
-    "price": 4.90,
-    "image_url": "/static/images/beers/test-beer-1.jpg",
-    "alcohol_percentage": 4.50,
-    "is_filtered": true,
-    "beer_type": "LIGHT",
-    "volume": 500,
-    "total_amount": 24
+    "name": "Midnight Oatmeal Stout",
+    "description": "Rich dark stout with oatmeal softness, cocoa flavor, and low sweetness.",
+    "price": 14.60,
+    "image_url": "/static/images/beers/test-beer-3.jpg",
+    "alcohol_percentage": 7.50,
+    "is_filtered": false,
+    "beer_type": "DARK",
+    "volume": 440,
+    "total_amount": 7
   },
   {
     "name": "Golden Hop Pilsner",
@@ -22,15 +22,15 @@
     "total_amount": 18
   },
   {
-    "name": "Citrus Wheat Ale",
-    "description": "Light wheat beer with citrus aroma, soft body, and smooth cloudy texture.",
-    "price": 7.20,
-    "image_url": "/static/images/beers/test-beer-3.jpg",
-    "alcohol_percentage": 4.80,
+    "name": "Cherry Dark Ale",
+    "description": "Dark ale with sour cherry notes, roasted background, and a smooth finish.",
+    "price": 18.40,
+    "image_url": null,
+    "alcohol_percentage": 6.80,
     "is_filtered": false,
-    "beer_type": "LIGHT",
+    "beer_type": "DARK",
     "volume": 500,
-    "total_amount": 30
+    "total_amount": 0
   },
   {
     "name": "Summer Pale Ale",
@@ -44,37 +44,26 @@
     "total_amount": 15
   },
   {
-    "name": "Honey Blonde Ale",
-    "description": "Smooth blonde ale with light honey aroma, mild sweetness, and a clean finish.",
-    "price": 9.90,
+    "name": "Imperial Cocoa Stout",
+    "description": "Strong imperial stout with cocoa, espresso, and dense roasted malt character.",
+    "price": 21.90,
     "image_url": null,
-    "alcohol_percentage": 5.20,
+    "alcohol_percentage": 9.80,
+    "is_filtered": true,
+    "beer_type": "DARK",
+    "volume": 330,
+    "total_amount": 4
+  },
+  {
+    "name": "Amber Dawn Lager",
+    "description": "Light craft lager with soft malt sweetness and a clean crisp finish.",
+    "price": 4.90,
+    "image_url": "/static/images/beers/test-beer-1.jpg",
+    "alcohol_percentage": 4.50,
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 12
-  },
-  {
-    "name": "Hazy Farmhouse Ale",
-    "description": "Unfiltered light ale with herbal aroma, soft haze, and a rustic dry finish.",
-    "price": 10.50,
-    "image_url": null,
-    "alcohol_percentage": 6.00,
-    "is_filtered": false,
-    "beer_type": "LIGHT",
-    "volume": 500,
-    "total_amount": 0
-  },
-  {
-    "name": "Nordic Light IPA",
-    "description": "Light IPA with pine, grapefruit, and a firm but pleasant hop bitterness.",
-    "price": 11.30,
-    "image_url": null,
-    "alcohol_percentage": 6.50,
-    "is_filtered": true,
-    "beer_type": "LIGHT",
-    "volume": 440,
-    "total_amount": 9
+    "total_amount": 24
   },
   {
     "name": "Dry Saison Gold",
@@ -99,26 +88,15 @@
     "total_amount": 16
   },
   {
-    "name": "Black River Stout",
-    "description": "Full-bodied stout with coffee aroma, roasted bitterness, and a creamy finish.",
-    "price": 13.70,
-    "image_url": "/static/images/beers/test-beer-2.jpg",
-    "alcohol_percentage": 7.00,
+    "name": "Honey Blonde Ale",
+    "description": "Smooth blonde ale with light honey aroma, mild sweetness, and a clean finish.",
+    "price": 9.90,
+    "image_url": null,
+    "alcohol_percentage": 5.20,
     "is_filtered": true,
-    "beer_type": "DARK",
+    "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 11
-  },
-  {
-    "name": "Midnight Oatmeal Stout",
-    "description": "Rich dark stout with oatmeal softness, cocoa flavor, and low sweetness.",
-    "price": 14.60,
-    "image_url": "/static/images/beers/test-beer-3.jpg",
-    "alcohol_percentage": 7.50,
-    "is_filtered": false,
-    "beer_type": "DARK",
-    "volume": 440,
-    "total_amount": 7
+    "total_amount": 12
   },
   {
     "name": "Smoked Baltic Porter",
@@ -132,26 +110,37 @@
     "total_amount": 5
   },
   {
-    "name": "Cherry Dark Ale",
-    "description": "Dark ale with sour cherry notes, roasted background, and a smooth finish.",
-    "price": 18.40,
-    "image_url": null,
-    "alcohol_percentage": 6.80,
+    "name": "Citrus Wheat Ale",
+    "description": "Light wheat beer with citrus aroma, soft body, and smooth cloudy texture.",
+    "price": 7.20,
+    "image_url": "/static/images/beers/test-beer-3.jpg",
+    "alcohol_percentage": 4.80,
     "is_filtered": false,
-    "beer_type": "DARK",
+    "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 0
+    "total_amount": 30
   },
   {
-    "name": "Imperial Cocoa Stout",
-    "description": "Strong imperial stout with cocoa, espresso, and dense roasted malt character.",
-    "price": 21.90,
-    "image_url": null,
-    "alcohol_percentage": 9.80,
+    "name": "Black River Stout",
+    "description": "Full-bodied stout with coffee aroma, roasted bitterness, and a creamy finish.",
+    "price": 13.70,
+    "image_url": "/static/images/beers/test-beer-2.jpg",
+    "alcohol_percentage": 7.00,
     "is_filtered": true,
     "beer_type": "DARK",
-    "volume": 330,
-    "total_amount": 4
+    "volume": 500,
+    "total_amount": 11
+  },
+  {
+    "name": "Nordic Light IPA",
+    "description": "Light IPA with pine, grapefruit, and a firm but pleasant hop bitterness.",
+    "price": 11.30,
+    "image_url": null,
+    "alcohol_percentage": 6.50,
+    "is_filtered": true,
+    "beer_type": "LIGHT",
+    "volume": 440,
+    "total_amount": 9
   },
   {
     "name": "Dark Forest Bock",
@@ -163,5 +152,16 @@
     "beer_type": "DARK",
     "volume": 500,
     "total_amount": 13
+  },
+  {
+    "name": "Hazy Farmhouse Ale",
+    "description": "Unfiltered light ale with herbal aroma, soft haze, and a rustic dry finish.",
+    "price": 10.50,
+    "image_url": null,
+    "alcohol_percentage": 6.00,
+    "is_filtered": false,
+    "beer_type": "LIGHT",
+    "volume": 500,
+    "total_amount": 0
   }
 ]
