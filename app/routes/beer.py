@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy import select, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +8,7 @@ from db.dependencies import get_db
 from app.models.beer import Beer
 from app.schemas.beer import BeerListSchema
 from app.dependencies.enums import BeerTypeEnum, AlcoholRangeEnum
+from app.schemas.beer import BeerDetailSchema
 
 router = APIRouter(
     prefix="/beers",
@@ -74,3 +75,14 @@ async def get_beer_list(
         "beers": beers,
         "next_offset": next_offset,
     }
+
+
+@router.get("/{beer_id}/", response_model=BeerDetailSchema)
+async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Beer).where(Beer.id == beer_id))
+    beer = result.scalar_one_or_none()
+
+    if beer is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Beer not found")
+
+    return beer
