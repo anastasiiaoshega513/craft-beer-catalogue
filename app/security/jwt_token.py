@@ -46,3 +46,23 @@ class JWTAuthManager:
             data,
             self._secret_key_refresh,
             timedelta(minutes=self._REFRESH_TOKEN_EXPIRE_MINUTES))
+
+
+    def decode_access_token(self, token: str) -> dict:
+
+        try:
+            return jwt.decode(token, self._secret_key_access, algorithms=[self._ALGORITHM])
+        except ExpiredSignatureError:
+            raise TokenExpiredError
+        except JWTError:
+            raise InvalidTokenError
+
+
+    def decode_refresh_token(self, token: str) -> dict:
+
+        try:
+            return jwt.decode(token, self._secret_key_refresh, algorithms=[self._ALGORITHM])
+        except ExpiredSignatureError:
+            raise TokenExpiredError
+        except JWTError:
+            raise InvalidTokenError
