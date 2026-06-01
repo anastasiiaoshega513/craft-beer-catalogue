@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, Boolean
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 from app.validators import users as validators
 from db.engine import Base
@@ -16,6 +16,20 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     _hashed_password = Column("hashed_password", String(255), nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
+
+    activation_token = relationship(
+        "ActivationToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+
+    password_reset_token = relationship(
+        "PasswordResetToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
