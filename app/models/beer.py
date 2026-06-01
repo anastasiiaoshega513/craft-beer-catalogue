@@ -27,6 +27,5 @@ class Beer(Base):
     def is_available(self) -> bool:
         return self.total_amount > 0
 
-
     def __repr__(self):
         return f"<Beer={self.name}>"
