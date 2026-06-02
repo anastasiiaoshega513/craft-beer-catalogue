@@ -113,4 +113,3 @@ async def activate_user(activation_token: UserActivationSchema, db: AsyncSession
     return {
         "message": "Account activated successfully.",
     }
-
