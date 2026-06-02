@@ -36,7 +36,12 @@ async def register_user(
         )
 
     try:
-        new_user = User.create(email=user.email, raw_password=user.password)
+        new_user = User.create(
+            email=user.email,
+            raw_password=user.password,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
         db.add(new_user)
         await db.flush()
 
@@ -81,7 +86,7 @@ async def activate_user(activation_token: UserActivationSchema, db: AsyncSession
             detail="Invalid activation token.",
         )
 
-    if activation_token.expires_at < datetime.now(timezone.utc):
+    if activation_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         await db.delete(activation_token)
         await db.commit()
 

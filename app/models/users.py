@@ -35,8 +35,14 @@ class User(Base):
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
 
     @classmethod
-    def create(cls, email: str, raw_password: str) -> "User":
-        user = cls(email=email)
+    def create(
+            cls,
+            email: str,
+            raw_password: str,
+            first_name: str | None = None,
+            last_name: str | None = None,
+    ) -> "User":
+        user = cls(email=email, first_name=first_name, last_name=last_name)
         user.password = raw_password
         return user
 
