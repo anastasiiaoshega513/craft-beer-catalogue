@@ -19,3 +19,40 @@ def send_email(to_whom: str, subject: str, body: str) -> None:
             server.login(config.SMTP_USER, config.SMTP_PASSWORD)
 
         server.send_message(message)
+
+
+def send_activation_email(to_whom: str, activation_link: str) -> None:
+    subject = "Confirm your email"
+
+    body = f"""
+Hello!
+
+Please confirm your email by clicking the link below:
+{activation_link}
+If you did not register, ignore this email.
+"""
+
+    send_email(
+        to_whom=to_whom,
+        subject=subject,
+        body=body,
+    )
+
+
+def send_password_reset_email(to_whom: str, reset_link: str) -> None:
+    subject = "Reset your password"
+
+    body = f"""
+Hello!
+
+You requested a password reset for your account.
+Please click the link below to create a new password:
+{reset_link}
+If you did not request a password reset, ignore this email.
+    """
+
+    send_email(
+        to_whom=to_whom,
+        subject=subject,
+        body=body,
+    )
