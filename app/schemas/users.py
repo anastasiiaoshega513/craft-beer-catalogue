@@ -15,7 +15,8 @@ class BaseEmailPasswordSchema(BaseModel):
 
 
 class UserRegistrationSchema(BaseEmailPasswordSchema):
-    pass
+    first_name: str | None = None
+    last_name: str | None = None
 
 
 class UserActivationSchema(BaseModel):
