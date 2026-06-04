@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 from urllib import request
 
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -176,4 +176,16 @@ async def login_user(login_data: UserLoginSchema, db: AsyncSession = Depends(get
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+    }
+
+
+@router.post("/logout/", response_model=MessageResponseSchema)
+async def logout_user(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await db.execute(
+        delete(RefreshToken).where(RefreshToken.user_id == current_user.id)
+    )
+    await db.commit()
+
+    return {
+        "message": "User logged out successfully.",
     }
