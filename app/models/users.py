@@ -31,16 +31,22 @@ class User(Base):
         uselist=False,
     )
 
+    refresh_tokens = relationship(
+        "RefreshToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
 
     @classmethod
     def create(
-            cls,
-            email: str,
-            raw_password: str,
-            first_name: str | None = None,
-            last_name: str | None = None,
+        cls,
+        email: str,
+        raw_password: str,
+        first_name: str | None = None,
+        last_name: str | None = None,
     ) -> "User":
         user = cls(email=email, first_name=first_name, last_name=last_name)
         user.password = raw_password
@@ -48,7 +54,9 @@ class User(Base):
 
     @property
     def password(self) -> None:
-        raise AttributeError("Password is write-only. Use the setter to set the password.")
+        raise AttributeError(
+            "Password is write-only. Use the setter to set the password."
+        )
 
     @password.setter
     def password(self, raw_password: str) -> None:
