@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 
 from app.validators import users as validators
 
@@ -39,3 +39,11 @@ class UserUpdateSchema(BaseEmailPasswordSchema):
 
 class MessageResponseSchema(BaseModel):
     message: str
+
+
+class UserMeSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr
