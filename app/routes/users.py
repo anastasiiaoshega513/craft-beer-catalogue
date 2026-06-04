@@ -1,5 +1,4 @@
 from datetime import datetime, timezone, timedelta
-from urllib import request
 
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy import select, delete
@@ -19,8 +18,10 @@ from app.schemas.users import (
     UserRegistrationSchema,
     TokenResponseSchema,
     UserMeSchema,
+    AccessTokenSchema,
+    RefreshTokenSchema,
 )
-from app.security.jwt_token import JWTAuthManager
+from app.security.jwt_token import JWTAuthManager, TokenExpiredError, InvalidTokenError
 from app.dependencies.users import get_current_user
 from app.security.secure_token import hash_token
 
@@ -201,3 +202,39 @@ async def get_me(current_user: User = Depends(get_current_user)):
         "last_name": current_user.last_name,
         "email": current_user.email,
     }
+
+
+@router.post("/refresh/", response_model=AccessTokenSchema)
+async def refresh_access_token(
+    refresh_token: RefreshTokenSchema, db: AsyncSession = Depends(get_db)
+):
+
+    try:
+        payload = jwt_manager.decode_refresh_token(refresh_token.refresh_token)
+        user_id = int(payload["sub"])
+
+    except (TokenExpiredError, InvalidTokenError, KeyError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token.",
+        )
+
+    result = await db.execute(
+        select(RefreshToken).where(
+            RefreshToken.token_hash == hash_token(refresh_token.refresh_token),
+            RefreshToken.user_id == user_id,
+        )
+    )
+    db_refresh_token = result.scalar_one_or_none()
+
+    if db_refresh_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token is not active.",
+        )
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    access_token = jwt_manager.create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}
