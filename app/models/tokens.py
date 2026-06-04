@@ -12,18 +12,17 @@ class BaseToken(Base):
 
     id = Column(Integer, primary_key=True)
     token = Column(
-        String(64),
-        unique=True,
-        nullable=False,
-        default=generate_secure_token
+        String(64), unique=True, nullable=False, default=generate_secure_token
     )
     expires_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc) + timedelta(days=1)
+        default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
     )
 
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
 
 
 class ActivationToken(BaseToken):
@@ -42,3 +41,22 @@ class PasswordResetToken(BaseToken):
 
     def __repr__(self):
         return f"<PasswordResetTokenModel(id={self.id}, token={self.token}, expires_at={self.expires_at})>"
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id = Column(Integer, primary_key=True)
+
+    token_hash = Column(String(64), unique=True, nullable=False, index=True)
+
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    user = relationship("User", back_populates="refresh_token")
+
+    def __repr__(self):
+        return f"<RefreshToken(id={self.id}, user_id={self.user_id}, expires_at={self.expires_at})>"
