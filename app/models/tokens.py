@@ -56,7 +56,7 @@ class RefreshToken(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    user = relationship("User", back_populates="refresh_token")
+    user = relationship("User", back_populates="refresh_tokens")
 
     def __repr__(self):
         return f"<RefreshToken(id={self.id}, user_id={self.user_id}, expires_at={self.expires_at})>"

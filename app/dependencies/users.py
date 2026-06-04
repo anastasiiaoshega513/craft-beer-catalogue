@@ -1,4 +1,5 @@
 from fastapi import Depends, Request, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +8,6 @@ from app import config
 from db.dependencies import get_db
 from app.security.jwt_token import (
     JWTAuthManager,
-    get_token,
     TokenExpiredError,
     InvalidTokenError,
 )
@@ -18,9 +18,15 @@ jwt_manager = JWTAuthManager(
     secret_key_refresh=config.JWT_REFRESH_SECRET_KEY,
 )
 
+bearer_scheme = HTTPBearer()
 
-async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
-    token = get_token(request)
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+
+    token = credentials.credentials
 
     try:
         payload = jwt_manager.decode_access_token(token)
