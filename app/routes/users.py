@@ -18,6 +18,7 @@ from app.schemas.users import (
     MessageResponseSchema,
     UserRegistrationSchema,
     TokenResponseSchema,
+    UserMeSchema,
 )
 from app.security.jwt_token import JWTAuthManager
 from app.dependencies.users import get_current_user
@@ -180,7 +181,9 @@ async def login_user(login_data: UserLoginSchema, db: AsyncSession = Depends(get
 
 
 @router.post("/logout/", response_model=MessageResponseSchema)
-async def logout_user(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def logout_user(
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+):
     await db.execute(
         delete(RefreshToken).where(RefreshToken.user_id == current_user.id)
     )
@@ -188,4 +191,13 @@ async def logout_user(current_user: User = Depends(get_current_user), db: AsyncS
 
     return {
         "message": "User logged out successfully.",
+    }
+
+
+@router.get("/me/", response_model=UserMeSchema)
+async def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name,
+        "email": current_user.email,
     }
