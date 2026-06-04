@@ -47,3 +47,12 @@ class UserMeSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     email: EmailStr
+
+
+class RefreshTokenSchema(BaseModel):
+    refresh_token: str
+
+
+class AccessTokenSchema(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
