@@ -1,10 +1,17 @@
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.validators import users as validators
 
 
-class BaseEmailPasswordSchema(BaseModel):
+class MessageResponseSchema(BaseModel):
+    message: str
+
+
+class EmailSchema(BaseModel):
     email: EmailStr
+
+
+class PasswordSchema(BaseModel):
     password: str
 
     @field_validator("password")
@@ -14,7 +21,11 @@ class BaseEmailPasswordSchema(BaseModel):
         return value
 
 
-class UserRegistrationSchema(BaseEmailPasswordSchema):
+class UserLoginSchema(EmailSchema):
+    password: str
+
+
+class UserRegistrationSchema(EmailSchema, PasswordSchema):
     first_name: str | None = None
     last_name: str | None = None
 
@@ -23,22 +34,19 @@ class UserActivationSchema(BaseModel):
     token: str
 
 
-class UserLoginSchema(BaseEmailPasswordSchema):
-    pass
-
-
 class TokenResponseSchema(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
 
-class UserUpdateSchema(BaseEmailPasswordSchema):
-    pass
+class RefreshTokenSchema(BaseModel):
+    refresh_token: str
 
 
-class MessageResponseSchema(BaseModel):
-    message: str
+class AccessTokenSchema(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
 
 class UserMeSchema(BaseModel):
@@ -49,10 +57,6 @@ class UserMeSchema(BaseModel):
     email: EmailStr
 
 
-class RefreshTokenSchema(BaseModel):
-    refresh_token: str
-
-
-class AccessTokenSchema(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+class UserUpdateSchema(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
