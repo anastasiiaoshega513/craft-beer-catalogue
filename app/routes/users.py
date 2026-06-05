@@ -21,6 +21,7 @@ from app.schemas.users import (
     UserLoginSchema,
     UserMeSchema,
     UserRegistrationSchema,
+    UserUpdateSchema,
 )
 from app.security.jwt_token import InvalidTokenError, JWTAuthManager, TokenExpiredError
 from app.security.secure_token import hash_token
@@ -199,11 +200,38 @@ async def logout_user(
 
 @router.get("/me/", response_model=UserMeSchema)
 async def get_me(current_user: User = Depends(get_current_user)):
-    return {
-        "first_name": current_user.first_name,
-        "last_name": current_user.last_name,
-        "email": current_user.email,
-    }
+    return current_user
+
+
+@router.patch("/me/", response_model=UserMeSchema)
+async def update_me(
+    data: UserUpdateSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    update_data = data.model_dump(exclude_unset=True)
+
+    try:
+        for field, value in update_data.items():
+            setattr(current_user, field, value)
+
+        await db.commit()
+        await db.refresh(current_user)
+
+    except ValueError as error:
+        await db.rollback()
+
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+
+    except SQLAlchemyError:
+        await db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while updating user.",
+        )
+
+    return current_user
 
 
 @router.post("/refresh/", response_model=AccessTokenSchema)
