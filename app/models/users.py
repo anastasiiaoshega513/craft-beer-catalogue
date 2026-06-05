@@ -1,9 +1,9 @@
-from sqlalchemy import Column, String, Integer, Boolean
-from sqlalchemy.orm import validates, relationship
+from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.orm import relationship, validates
 
+from app.security.passwords import hash_password, verify_password
 from app.validators import users as validators
 from db.engine import Base
-from app.security.passwords import verify_password, hash_password
 
 
 class User(Base):

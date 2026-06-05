@@ -1,7 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text, Numeric, Enum, Boolean, CheckConstraint
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Enum,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 
-from db.engine import Base
 from app.dependencies.enums import BeerTypeEnum
+from db.engine import Base
 
 
 class Beer(Base):

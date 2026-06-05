@@ -5,8 +5,8 @@ from pathlib import Path
 
 from sqlalchemy import delete
 
-from db.engine import AsyncSessionLocal
 from app.models.beer import Beer, BeerTypeEnum
+from db.engine import AsyncSessionLocal
 
 
 async def seed_beers() -> None:

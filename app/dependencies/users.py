@@ -1,17 +1,12 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config
-from db.dependencies import get_db
-from app.security.jwt_token import (
-    JWTAuthManager,
-    TokenExpiredError,
-    InvalidTokenError,
-)
 from app.models.users import User
+from app.security.jwt_token import InvalidTokenError, JWTAuthManager, TokenExpiredError
+from db.dependencies import get_db
 
 jwt_manager = JWTAuthManager(
     secret_key_access=config.JWT_ACCESS_SECRET_KEY,

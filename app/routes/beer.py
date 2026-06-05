@@ -1,14 +1,13 @@
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query, HTTPException, status
-from sqlalchemy import select, asc, desc
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import asc, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.dependencies import get_db
+from app.dependencies.enums import AlcoholRangeEnum, BeerTypeEnum
 from app.models.beer import Beer
-from app.schemas.beer import BeerListSchema
-from app.dependencies.enums import BeerTypeEnum, AlcoholRangeEnum
-from app.schemas.beer import BeerDetailSchema
+from app.schemas.beer import BeerDetailSchema, BeerListSchema
+from db.dependencies import get_db
 
 router = APIRouter(
     prefix="/beers",
@@ -18,14 +17,14 @@ router = APIRouter(
 
 @router.get("/", response_model=BeerListSchema)
 async def get_beer_list(
-        offset: int = Query(0, ge=0),
-        search: str | None = Query(None, alias="search"),
-        beer_type: BeerTypeEnum | None = Query(None, alias="type"),
-        alcohol_range: AlcoholRangeEnum | None = Query(None, alias="alcohol"),
-        filtered: bool = Query(None, alias="filtered"),
-        sort_by: Literal["id", "price"] = "id",
-        sort_order: Literal["asc", "desc"] = "asc",
-        db: AsyncSession = Depends(get_db)
+    offset: int = Query(0, ge=0),
+    search: str | None = Query(None, alias="search"),
+    beer_type: BeerTypeEnum | None = Query(None, alias="type"),
+    alcohol_range: AlcoholRangeEnum | None = Query(None, alias="alcohol"),
+    filtered: bool = Query(None, alias="filtered"),
+    sort_by: Literal["id", "price"] = "id",
+    sort_order: Literal["asc", "desc"] = "asc",
+    db: AsyncSession = Depends(get_db),
 ):
     if sort_order == "asc":
         order_by = asc(sort_by)
@@ -56,11 +55,7 @@ async def get_beer_list(
     limit = 6
 
     result = await db.execute(
-        select(Beer)
-        .order_by(order_by)
-        .where(*filters)
-        .offset(offset)
-        .limit(limit + 1)
+        select(Beer).order_by(order_by).where(*filters).offset(offset).limit(limit + 1)
     )
 
     beers = result.scalars().all()
@@ -83,6 +78,8 @@ async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
     beer = result.scalar_one_or_none()
 
     if beer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Beer not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Beer not found"
+        )
 
     return beer
