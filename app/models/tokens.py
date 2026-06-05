@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from db.engine import Base
 from app.security.secure_token import generate_secure_token
+from db.engine import Base
 
 
 class BaseToken(Base):

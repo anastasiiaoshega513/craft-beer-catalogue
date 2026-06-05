@@ -1,6 +1,6 @@
 from uuid import uuid4
-from fastapi import Request, Response
 
+from fastapi import Request, Response
 
 GUEST_COOKIE = "guest_id"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 30
