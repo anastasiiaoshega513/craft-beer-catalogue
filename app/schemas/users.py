@@ -60,3 +60,11 @@ class UserMeSchema(BaseModel):
 class UserUpdateSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
+
+
+class PasswordResetRequestSchema(EmailSchema):
+    pass
+
+
+class PasswordResetCompleteRequestSchema(PasswordSchema):
+    token: str
