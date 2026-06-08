@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.routes.beer import router as beer_router
 from app.routes.users import router as users_router
+from app.routes.carts import router as carts_router
 
 app = FastAPI()
 
@@ -19,4 +20,5 @@ app.add_middleware(
 
 app.include_router(beer_router)
 app.include_router(users_router)
+app.include_router(carts_router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
