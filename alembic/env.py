@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from app.models import beer, tokens, users
+from app.models import beer, carts, tokens, users
 from db.engine import Base
 
 # this is the Alembic Config object, which provides
