@@ -14,11 +14,12 @@ jwt_manager = JWTAuthManager(
 )
 
 bearer_scheme = HTTPBearer()
+optional_bearer_scheme = HTTPBearer(auto_error=False)
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    db: AsyncSession = Depends(get_db),
+async def _get_user_from_credentials(
+    credentials: HTTPAuthorizationCredentials,
+    db: AsyncSession,
 ) -> User:
 
     token = credentials.credentials
@@ -48,3 +49,20 @@ async def get_current_user(
         )
 
     return user
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    return await _get_user_from_credentials(credentials, db)
+
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    if credentials is None:
+        return None
+
+    return await _get_user_from_credentials(credentials, db)
