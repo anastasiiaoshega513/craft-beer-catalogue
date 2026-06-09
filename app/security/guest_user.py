@@ -20,7 +20,7 @@ def get_or_create_guest_id(request: Request, response: Response) -> str:
         max_age=COOKIE_MAX_AGE,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=False,  # TODO change to True when we deploy
     )
 
     return guest_id

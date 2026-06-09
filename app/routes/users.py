@@ -1,6 +1,14 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,9 +52,11 @@ async def register_user(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(User)
-                              .options(selectinload(User.activation_token))
-                              .where(User.email == user.email.lower()))
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.activation_token))
+        .where(User.email == user.email.lower())
+    )
     existing_user = result.scalar_one_or_none()
 
     if existing_user and existing_user.is_active:
@@ -95,9 +105,7 @@ async def register_user(
             detail="An error occurred during user creation.",
         )
 
-    activation_link = (
-        f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
-    )
+    activation_link = f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
 
     background_tasks.add_task(
         send_activation_email,
@@ -160,9 +168,14 @@ jwt_manager = JWTAuthManager(
     secret_key_refresh=config.JWT_REFRESH_SECRET_KEY,
 )
 
+REFRESH_TOKEN_COOKIE = "refresh_token"
+COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+
 
 @router.post("/login/", response_model=TokenResponseSchema)
-async def login_user(login_data: UserLoginSchema, db: AsyncSession = Depends(get_db)):
+async def login_user(
+    login_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(
         select(User).where(User.email == login_data.email.lower())
     )
@@ -197,9 +210,17 @@ async def login_user(login_data: UserLoginSchema, db: AsyncSession = Depends(get
     db.add(db_refresh_token)
     await db.commit()
 
+    response.set_cookie(
+        key=REFRESH_TOKEN_COOKIE,
+        value=refresh_token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="strict",
+        secure=False,  # TODO change to True when we deploy
+    )
+
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token,
         "token_type": "bearer",
     }
 
@@ -255,9 +276,14 @@ async def update_me(
 
 
 @router.post("/refresh/", response_model=AccessTokenSchema)
-async def refresh_access_token(
-    refresh_token: RefreshTokenSchema, db: AsyncSession = Depends(get_db)
-):
+async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_db)):
+    refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token.",
+        )
 
     try:
         payload = jwt_manager.decode_refresh_token(refresh_token.refresh_token)
