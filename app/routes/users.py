@@ -68,6 +68,13 @@ async def register_user(
         await db.commit()
         await db.refresh(activation_token)
 
+    except ValueError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(e),
+        )
+
     except SQLAlchemyError:
         await db.rollback()
         raise HTTPException(
