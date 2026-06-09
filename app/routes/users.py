@@ -44,27 +44,40 @@ async def register_user(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(User).where(User.email == user.email.lower()))
+    result = await db.execute(select(User)
+                              .options(selectinload(User.activation_token))
+                              .where(User.email == user.email.lower()))
     existing_user = result.scalar_one_or_none()
 
-    if existing_user:
+    if existing_user and existing_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exists.",
         )
 
     try:
-        new_user = User.create(
-            email=user.email,
-            raw_password=user.password,
-            first_name=user.first_name,
-            last_name=user.last_name,
-        )
-        db.add(new_user)
-        await db.flush()
+        if existing_user:
+            if existing_user.activation_token:
+                await db.delete(existing_user.activation_token)
+                await db.flush()
 
-        activation_token = ActivationToken(user_id=new_user.id)
-        db.add(activation_token)
+            activation_token = ActivationToken(user_id=existing_user.id)
+            db.add(activation_token)
+
+        else:
+            new_user = User.create(
+                email=user.email.lower(),
+                raw_password=user.password,
+                first_name=user.first_name,
+                last_name=user.last_name,
+            )
+
+            db.add(new_user)
+            await db.flush()
+
+            activation_token = ActivationToken(user_id=new_user.id)
+            db.add(activation_token)
+
         await db.commit()
         await db.refresh(activation_token)
 
@@ -82,17 +95,17 @@ async def register_user(
             detail="An error occurred during user creation.",
         )
 
-    else:
-        activation_link = (
-            f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
-        )
-        background_tasks.add_task(
-            send_activation_email,
-            user.email,
-            activation_link,
-        )
+    activation_link = (
+        f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
+    )
 
-        return {"message": "User created. Please check your email."}
+    background_tasks.add_task(
+        send_activation_email,
+        user.email.lower(),
+        activation_link,
+    )
+
+    return {"message": "User created. Please check your email."}
 
 
 @router.post("/activate/", response_model=MessageResponseSchema)
