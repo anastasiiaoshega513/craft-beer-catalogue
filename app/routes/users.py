@@ -93,9 +93,14 @@ async def register_user(
 
     except ValueError as e:
         await db.rollback()
+        error_list = e.args[0]
+
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=str(e),
+            detail={
+                "message": "Password must contain:",
+                "errors": error_list,
+            },
         )
 
     except SQLAlchemyError:
