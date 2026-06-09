@@ -7,19 +7,18 @@ def validate_password_strength(password: str) -> str:
     errors = []
 
     if len(password) < 8:
-        errors.append("- at least 8 characters")
+        errors.append("at least 8 characters")
     if not re.search(r"[A-Z]", password):
-        errors.append("- at least one uppercase letter")
+        errors.append("at least one uppercase letter")
     if not re.search(r"[a-z]", password):
-        errors.append("- at least one lower letter")
+        errors.append("at least one lower letter")
     if not re.search(r"\d", password):
-        errors.append("- at least one digit")
+        errors.append("at least one digit")
     if not re.search(r"[@$!%*?&#]", password):
-        errors.append("- at least one special character: @, $, !, %, *, ?, #, &")
+        errors.append("at least one special character: @, $, !, %, *, ?, #, &")
 
     if errors:
-        error_message = "Password must contain:\n" + "\n".join(errors)
-        raise ValueError(error_message)
+        raise ValueError(errors)
 
     return password
 
