@@ -17,7 +17,9 @@ class PasswordSchema(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, value: str) -> str:
-        validators.validate_password_strength(value)
+        if not value:
+            raise ValueError("Password is required.")
+
         return value
 
 
