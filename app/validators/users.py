@@ -30,12 +30,12 @@ def validate_email(user_email: str) -> str:
         )
         email = email_info.normalized
     except email_validator.EmailNotValidError as error:
-        raise ValueError({"email": ["Invalid email address."]})
+        raise ValueError({"email": "Invalid email address."})
     else:
         return email
 
 
 def validate_name(name: str, field: str):
     if re.search(r"^[A-Za-z]*$", name) is None:
-        raise ValueError({field: ["Only English letters are allowed."]})
+        raise ValueError({field: "Only English letters are allowed."})
     return name
