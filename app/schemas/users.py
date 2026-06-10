@@ -1,7 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-from app.validators import users as validators
-
 
 class MessageResponseSchema(BaseModel):
     message: str
