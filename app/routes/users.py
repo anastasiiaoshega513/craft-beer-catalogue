@@ -60,7 +60,7 @@ async def register_user(
     if existing_user and existing_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"user_account": ["User with this email already exists."]},
+            detail={"user_account": "User with this email already exists."},
         )
 
     try:
@@ -101,7 +101,7 @@ async def register_user(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"server_error": ["An error occurred during user creation."]},
+            detail={"server_error": "An error occurred during user creation."},
         )
 
     activation_link = f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
@@ -130,7 +130,7 @@ async def activate_user(
     if activation_token is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"activation_token": ["Invalid activation token."]},
+            detail={"activation_token": "Invalid activation token."},
         )
 
     if activation_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
@@ -139,7 +139,7 @@ async def activate_user(
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"activation_token": ["Activation token has expired."]},
+            detail={"activation_token": "Activation token has expired."},
         )
 
     user = activation_token.user
@@ -183,13 +183,13 @@ async def login_user(
     if not user or not user.verify_password(login_data.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"user_account": ["Invalid email or password."]},
+            detail={"user_account": "Invalid email or password."},
         )
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"user_account": ["User account is not activated."]},
+            detail={"user_account": "User account is not activated."},
         )
 
     token_data = {
@@ -268,7 +268,7 @@ async def update_me(
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"server_error": ["An error occurred while updating user."]},
+            detail={"server_error": "An error occurred while updating user."},
         )
 
     return current_user
@@ -281,7 +281,7 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"refresh_token": ["Invalid or expired refresh token."]},
+            detail={"refresh_token": "Invalid or expired refresh token."},
         )
 
     try:
@@ -291,7 +291,7 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
     except (TokenExpiredError, InvalidTokenError, KeyError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"refresh_token": ["Invalid or expired refresh token."]},
+            detail={"refresh_token": "Invalid or expired refresh token."},
         )
 
     result = await db.execute(
@@ -305,7 +305,7 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
     if db_refresh_token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"refresh_token": ["Invalid or expired refresh token."]},
+            detail={"refresh_token": "Invalid or expired refresh token."},
         )
 
     result = await db.execute(select(User).where(User.id == user_id))
@@ -372,7 +372,7 @@ async def password_reset_complete(
 
     if not db_token:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail={"reset_token": ["Invalid email or token."]}
+            status_code=status.HTTP_400_BAD_REQUEST, detail={"reset_token": "Invalid email or token."}
         )
 
     if db_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
@@ -381,7 +381,7 @@ async def password_reset_complete(
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"reset_token": ["Invalid email or token."]}
+            detail={"reset_token": "Invalid email or token."}
         )
 
     user = db_token.user
@@ -392,7 +392,7 @@ async def password_reset_complete(
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"reset_token": ["Invalid email or token."]}
+            detail={"reset_token": "Invalid email or token."}
         )
 
     try:
@@ -404,7 +404,7 @@ async def password_reset_complete(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"server_error": ["An error occurred during password resetting."]},
+            detail={"server_error": "An error occurred during password resetting."},
         )
 
     return {"message": "You have successfully reset your password."}

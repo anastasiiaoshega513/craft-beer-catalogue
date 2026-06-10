@@ -79,7 +79,7 @@ async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
 
     if beer is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail={"beer": ["Beer not found"]}
+            status_code=status.HTTP_404_NOT_FOUND, detail={"beer": "Beer not found"}
         )
 
     return beer
