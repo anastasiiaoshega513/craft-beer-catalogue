@@ -26,6 +26,19 @@ async def get_user_or_guest_cart(
 
 
 async def create_user_or_guest_cart(
-    request: Request, user: User | None, db: AsyncSession
+    request: Request,
+    response: Response,
+    user: User | None,
+    db: AsyncSession,
 ) -> Cart:
-    pass
+
+    if user is None:
+        guest_id = get_or_create_guest_id(request=request, response=response)
+        cart = Cart.create(guest_id=guest_id)
+    else:
+        cart = Cart.create(user_id=user.id)
+
+    db.add(cart)
+    await db.flush(cart)
+
+    return cart
