@@ -1,13 +1,11 @@
-from dependencies.users import get_current_user_optional
+from app.dependencies.users import get_current_user_optional
 from fastapi import APIRouter, Depends, Request
-from models.carts import Cart, CartItem
-from models.users import User
-from sqlalchemy import select
+from app.models.users import User
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.schemas.carts import CartSchema, MessageResponseSchema
 from db.dependencies import get_db
+from app.services.carts import get_user_or_guest_cart
 
 router = APIRouter(
     prefix="/cart",
@@ -21,22 +19,7 @@ async def get_cart(
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    if user:
-        stmt = (
-            select(Cart)
-            .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-            .where(Cart.user_id == user.id)
-        )
-    else:
-        guest_id = request.cookies["guest_id"]
-        stmt = (
-            select(Cart)
-            .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-            .where(Cart.guest_id == guest_id)
-        )
-
-    result = await db.execute(stmt)
-    cart = result.scalar_one_or_none()
+    cart = await get_user_or_guest_cart(request, user, db)
 
     if cart is None:
         return {
@@ -49,15 +32,14 @@ async def get_cart(
     items = []
 
     for item in cart.cart_items:
-        beer = item.beer
 
         items.append(
             {
                 "id": item.id,
-                "name": beer.name,
+                "name": item.beer.name,
                 "quantity": item.amount,
-                "price": beer.price,
-                "image_url": beer.image_url,
+                "price": item.beer.price,
+                "image_url": item.beer.image_url,
             }
         )
 
@@ -72,6 +54,11 @@ async def get_cart(
     }
 
 
-@router.post("/{item_id}", response_model=CartSchema)
-async def add_item():
-    pass
+@router.post("/{beer_id}/", response_model=CartSchema)
+async def add_item(
+    beer_id: int,
+    request: Request,
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    cart = await get_user_or_guest_cart(request, user, db)
