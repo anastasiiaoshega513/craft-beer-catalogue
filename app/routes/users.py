@@ -23,8 +23,6 @@ from app.schemas.users import (
     MessageResponseSchema,
     PasswordResetCompleteRequestSchema,
     PasswordResetRequestSchema,
-    RefreshTokenSchema,
-    TokenResponseSchema,
     UserActivationSchema,
     UserLoginSchema,
     UserMeSchema,
@@ -177,7 +175,7 @@ REFRESH_TOKEN_COOKIE = "refresh_token"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
 
-@router.post("/login/", response_model=TokenResponseSchema)
+@router.post("/login/", response_model=AccessTokenSchema)
 async def login_user(
     login_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)
 ):
@@ -291,7 +289,7 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
         )
 
     try:
-        payload = jwt_manager.decode_refresh_token(refresh_token.refresh_token)
+        payload = jwt_manager.decode_refresh_token(refresh_token)
         user_id = int(payload["sub"])
 
     except (TokenExpiredError, InvalidTokenError, KeyError, ValueError):
@@ -302,7 +300,7 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
 
     result = await db.execute(
         select(RefreshToken).where(
-            RefreshToken.token_hash == hash_token(refresh_token.refresh_token),
+            RefreshToken.token_hash == hash_token(refresh_token),
             RefreshToken.user_id == user_id,
         )
     )
