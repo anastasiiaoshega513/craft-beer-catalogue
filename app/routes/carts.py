@@ -1,12 +1,19 @@
-from app.dependencies.users import get_current_user_optional
-from fastapi import APIRouter, Depends, Request, Response
-from app.models.users import User
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.schemas.carts import CartSchema, MessageResponseSchema
+from app.dependencies.users import get_current_user_optional
+from app.models.beer import Beer
+from app.models.carts import Cart, CartItem
+from app.models.users import User
+from app.schemas.carts import CartSchema
+from app.services.carts import (
+    create_user_or_guest_cart,
+    format_cart,
+    get_user_or_guest_cart,
+)
 from db.dependencies import get_db
-from app.services.carts import get_user_or_guest_cart
-from services.carts import create_user_or_guest_cart
 
 router = APIRouter(
     prefix="/cart",
@@ -14,45 +21,16 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=CartSchema | MessageResponseSchema)
+@router.get("/", response_model=CartSchema)
 async def get_cart(
     request: Request,
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(request, user, db)
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
 
-    if cart is None:
-        return {
-            "id": None,
-            "cart_items": [],
-            "subtotal": 0,
-            "total": 0,
-        }
-
-    items = []
-
-    for item in cart.cart_items:
-
-        items.append(
-            {
-                "id": item.id,
-                "name": item.beer.name,
-                "quantity": item.amount,
-                "price": item.beer.price,
-                "image_url": item.beer.image_url,
-            }
-        )
-
-    subtotal = sum(item["price"] * item["quantity"] for item in items)
-    total = subtotal + 5
-
-    return {
-        "id": cart.id,
-        "cart_items": items,
-        "subtotal": subtotal,
-        "total": total,
-    }
+    cart = await format_cart(cart=cart)
+    return cart
 
 
 @router.post("/{beer_id}/", response_model=CartSchema)
