@@ -3,10 +3,6 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
 
-class MessageResponseSchema(BaseModel):
-    message: str
-
-
 class CartItemSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
