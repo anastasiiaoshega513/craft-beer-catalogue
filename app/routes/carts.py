@@ -1,11 +1,12 @@
 from app.dependencies.users import get_current_user_optional
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from app.models.users import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.carts import CartSchema, MessageResponseSchema
 from db.dependencies import get_db
 from app.services.carts import get_user_or_guest_cart
+from services.carts import create_user_or_guest_cart
 
 router = APIRouter(
     prefix="/cart",
@@ -58,7 +59,14 @@ async def get_cart(
 async def add_item(
     beer_id: int,
     request: Request,
+    response: Response,
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(request, user, db)
+    cart = await get_user_or_guest_cart(
+        request=request, user=user, db=db, response=response
+    )
+    if cart is None:
+        cart = create_user_or_guest_cart(
+            request=request, user=user, db=db, response=response
+        )
