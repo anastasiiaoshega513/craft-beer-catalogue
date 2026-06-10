@@ -71,9 +71,8 @@ class User(Base):
         return validators.validate_email(value.lower())
 
     @validates("first_name", "last_name")
-    def validate_name(self, _key, value):
+    def validate_name(self, key, value):
         if value is None:
             return value
 
-        validators.validate_name(value)
-        return value
+        return validators.validate_name(value.lower(), key)
