@@ -41,10 +41,42 @@ async def add_item(
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(
-        request=request, user=user, db=db, response=response
-    )
+    result = await db.execute(select(Beer).where(Beer.id == beer_id))
+    beer = result.scalar_one_or_none()
+
+    if beer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"beer_id": ["Beer not found."]},
+        )
+
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
     if cart is None:
-        cart = create_user_or_guest_cart(
+        cart = await create_user_or_guest_cart(
             request=request, user=user, db=db, response=response
         )
+
+    result = await db.execute(
+        select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id)
+    )
+    beer_item = result.scalar_one_or_none()
+
+    if beer_item is None:
+        beer_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=1)
+        db.add(beer_item)
+        await db.flush()
+
+    else:
+        beer_item.amount = beer_item.amount + 1
+
+    await db.commit()
+
+    result = await db.execute(
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
+        .where(Cart.id == cart.id)
+    )
+
+    cart = result.scalar_one_or_none()
+
+    return await format_cart(cart)
