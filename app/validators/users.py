@@ -18,7 +18,7 @@ def validate_password_strength(password: str) -> str:
         errors.append("at least one special character: @, $, !, %, *, ?, #, &")
 
     if errors:
-        raise ValueError(errors)
+        raise ValueError({"password": errors})
 
     return password
 
@@ -30,11 +30,12 @@ def validate_email(user_email: str) -> str:
         )
         email = email_info.normalized
     except email_validator.EmailNotValidError as error:
-        raise ValueError(str(error))
+        raise ValueError({"email": ["Invalid email address."]})
     else:
         return email
 
 
-def validate_name(name: str):
+def validate_name(name: str, field: str):
     if re.search(r"^[A-Za-z]*$", name) is None:
-        raise ValueError(f"{name} contains non-english letters")
+        raise ValueError({field: ["Only English letters are allowed."]})
+    return name
