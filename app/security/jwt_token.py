@@ -27,7 +27,9 @@ def get_token(request: Request) -> str:
     if scheme.lower() != "bearer" or not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"authorization": "Invalid Authorization header format. Expected 'Bearer <token>'"},
+            detail={
+                "authorization": "Invalid Authorization header format. Expected 'Bearer <token>'"
+            },
         )
 
     return token
