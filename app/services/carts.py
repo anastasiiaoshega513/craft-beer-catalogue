@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.carts import Cart, CartItem
 from app.models.users import User
-from app.security.guest_user import get_or_create_guest_id, GUEST_COOKIE
+from app.security.guest_user import GUEST_COOKIE, get_or_create_guest_id
 
 
 async def get_user_or_guest_cart(
@@ -98,12 +98,14 @@ async def format_cart(cart: Cart | None) -> dict:
     }
 
 
-async def get_fresh_cart(cart_id: int, db: AsyncSession) -> Cart | None:
+async def reload_and_format_cart(cart: Cart, db: AsyncSession) -> dict:
     result = await db.execute(
         select(Cart)
         .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-        .where(Cart.id == cart_id)
+        .where(Cart.id == cart.id)
         .execution_options(populate_existing=True)
     )
 
-    return result.scalar_one_or_none()
+    fresh_cart = result.scalar_one_or_none()
+
+    return await format_cart(fresh_cart)
