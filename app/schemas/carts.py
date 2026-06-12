@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CartItemSchema(BaseModel):
@@ -10,13 +10,13 @@ class CartItemSchema(BaseModel):
     name: str
     quantity: int
     price: Decimal
-    image_url: str
+    image_url: str | None = None
 
 
 class CartSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    cart_items: list[CartItemSchema]
-    subtotal: Decimal
-    total: Decimal
+    id: int | None = None
+    cart_items: list[CartItemSchema] = Field(default_factory=list)
+    subtotal: Decimal = Decimal("0")
+    total: Decimal = Decimal("0")
