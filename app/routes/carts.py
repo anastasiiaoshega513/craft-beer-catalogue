@@ -11,7 +11,7 @@ from app.schemas.carts import CartSchema
 from app.services.carts import (
     get_or_create_user_or_guest_cart,
     format_cart,
-    get_user_or_guest_cart,
+    get_user_or_guest_cart, get_fresh_cart,
 )
 from db.dependencies import get_db
 
@@ -82,14 +82,7 @@ async def add_item(
 
     await db.commit()
 
-    result = await db.execute(
-        select(Cart)
-        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-        .where(Cart.id == cart.id)
-        .execution_options(populate_existing=True)
-    )
-
-    cart = result.scalar_one_or_none()
+    cart = await get_fresh_cart(cart_id=cart.id, db=db)
 
     return await format_cart(cart)
 
@@ -130,14 +123,7 @@ async def remove_item(
 
     await db.commit()
 
-    result = await db.execute(
-        select(Cart)
-        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-        .where(Cart.id == cart.id)
-        .execution_options(populate_existing=True)
-    )
-
-    cart = result.scalar_one_or_none()
+    cart = await get_fresh_cart(cart_id=cart.id, db=db)
 
     return await format_cart(cart)
 
@@ -161,13 +147,6 @@ async def remove_all_items(
 
     await db.commit()
 
-    result = await db.execute(
-        select(Cart)
-        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
-        .where(Cart.id == cart.id)
-        .execution_options(populate_existing=True)
-    )
-
-    cart = result.scalar_one_or_none()
+    cart = await get_fresh_cart(cart_id=cart.id, db=db)
 
     return await format_cart(cart)
