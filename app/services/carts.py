@@ -29,21 +29,32 @@ async def get_user_or_guest_cart(
     return result.scalar_one_or_none()
 
 
-async def create_user_or_guest_cart(
+async def get_or_create_user_or_guest_cart(
     request: Request,
     response: Response,
     user: User | None,
     db: AsyncSession,
 ) -> Cart:
 
+    stmt = select(Cart)
+
     if user is None:
         guest_id = get_or_create_guest_id(request=request, response=response)
-        cart = Cart.create(guest_id=guest_id)
-    else:
-        cart = Cart.create(user_id=user.id)
+        result = await db.execute(stmt.where(Cart.guest_id == guest_id))
+        cart = result.scalar_one_or_none()
 
-    db.add(cart)
-    await db.flush()
+        if cart is None:
+            cart = Cart(guest_id=guest_id)
+            db.add(cart)
+            await db.flush()
+    else:
+        result = await db.execute(stmt.where(Cart.user_id == user.id))
+        cart = result.scalar_one_or_none()
+
+        if cart is None:
+            cart = Cart(user_id=user.id)
+            db.add(cart)
+            await db.flush()
 
     return cart
 
@@ -60,6 +71,10 @@ async def format_cart(cart: Cart | None) -> dict:
     items = []
 
     for item in cart.cart_items:
+
+        if item.amount <= 0:
+            continue
+
         items.append(
             {
                 "id": item.id,
