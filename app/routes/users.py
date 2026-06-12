@@ -372,7 +372,8 @@ async def password_reset_complete(
 
     if not db_token:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail={"reset_token": "Invalid email or token."}
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"reset_token": "Invalid email or token."},
         )
 
     if db_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
@@ -381,7 +382,7 @@ async def password_reset_complete(
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"reset_token": "Invalid email or token."}
+            detail={"reset_token": "Invalid email or token."},
         )
 
     user = db_token.user
@@ -392,7 +393,7 @@ async def password_reset_complete(
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"reset_token": "Invalid email or token."}
+            detail={"reset_token": "Invalid email or token."},
         )
 
     try:
