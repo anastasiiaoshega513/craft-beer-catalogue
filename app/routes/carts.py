@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.dependencies.users import get_current_user_optional
 from app.models.beer import Beer
-from app.models.carts import Cart, CartItem
+from app.models.carts import CartItem
 from app.models.users import User
 from app.schemas.carts import CartSchema
 from app.services.carts import (
-    get_or_create_user_or_guest_cart,
     format_cart,
-    get_user_or_guest_cart, get_fresh_cart,
+    reload_and_format_cart,
+    get_or_create_user_or_guest_cart,
+    get_user_or_guest_cart,
 )
 from db.dependencies import get_db
 
@@ -55,11 +55,9 @@ async def add_item(
             detail={"beer_id": "Beer is out of stock."},
         )
 
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-    if cart is None:
-        cart = await get_or_create_user_or_guest_cart(
-            request=request, user=user, db=db, response=response
-        )
+    cart = await get_or_create_user_or_guest_cart(
+        request=request, user=user, db=db, response=response
+    )
 
     result = await db.execute(
         select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id)
@@ -81,10 +79,7 @@ async def add_item(
         cart_item.amount += 1
 
     await db.commit()
-
-    cart = await get_fresh_cart(cart_id=cart.id, db=db)
-
-    return await format_cart(cart)
+    return await reload_and_format_cart(cart=cart, db=db)
 
 
 @router.delete("/{item_id}/", response_model=CartSchema)
@@ -122,13 +117,10 @@ async def remove_item(
         await db.delete(cart_item)
 
     await db.commit()
-
-    cart = await get_fresh_cart(cart_id=cart.id, db=db)
-
-    return await format_cart(cart)
+    return await reload_and_format_cart(cart=cart, db=db)
 
 
-@router.delete("/", response_model=CartSchema)
+@router.delete("/clear/", response_model=CartSchema)
 async def remove_all_items(
     request: Request,
     user: User | None = Depends(get_current_user_optional),
@@ -146,7 +138,4 @@ async def remove_all_items(
         await db.delete(item)
 
     await db.commit()
-
-    cart = await get_fresh_cart(cart_id=cart.id, db=db)
-
-    return await format_cart(cart)
+    return await reload_and_format_cart(cart=cart, db=db)
