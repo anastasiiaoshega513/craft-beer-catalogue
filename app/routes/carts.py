@@ -47,7 +47,13 @@ async def add_item(
     if beer is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"beer_id": ["Beer not found."]},
+            detail={"beer_id": "Beer not found."},
+        )
+
+    if beer.total_amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"beer_id": "Beer is out of stock."},
         )
 
     cart = await get_user_or_guest_cart(request=request, user=user, db=db)
@@ -67,7 +73,7 @@ async def add_item(
         await db.flush()
 
     else:
-        beer_item.amount = beer_item.amount + 1
+        beer_item.amount += 1
 
     await db.commit()
 
