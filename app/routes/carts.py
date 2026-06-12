@@ -86,3 +86,44 @@ async def add_item(
     cart = result.scalar_one_or_none()
 
     return await format_cart(cart)
+
+
+@router.delete("/{item_id}/", response_model=CartSchema)
+async def remove_item(
+    item_id: int,
+    request: Request,
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    if cart is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"cart_id": "Cart not found."},
+        )
+
+    result = await db.execute(
+        select(CartItem).where(
+            CartItem.id == item_id,
+            CartItem.cart_id == cart.id,
+        )
+    )
+    cart_item = result.scalar_one_or_none()
+
+    if cart_item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"item_id": "Item not found."},
+        )
+
+    cart_item.amount -= 1
+
+    if cart_item.amount <= 0:
+        await db.delete(cart_item)
+
+    await db.commit()
+
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    return await format_cart(cart)
