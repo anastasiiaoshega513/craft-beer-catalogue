@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.carts import Cart, CartItem
 from app.models.users import User
-from app.security.guest_user import get_or_create_guest_id
+from app.security.guest_user import get_or_create_guest_id, GUEST_COOKIE
 
 
 async def get_user_or_guest_cart(
@@ -18,7 +18,7 @@ async def get_user_or_guest_cart(
     if user:
         stmt = stmt.where(Cart.user_id == user.id)
     else:
-        guest_id = request.cookies.get("guest_cart_id")
+        guest_id = request.cookies.get(GUEST_COOKIE)
 
         if guest_id is None:
             return None
