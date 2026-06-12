@@ -29,7 +29,7 @@ def validate_email(user_email: str) -> str:
             user_email, check_deliverability=False
         )
         email = email_info.normalized
-    except email_validator.EmailNotValidError as error:
+    except email_validator.EmailNotValidError:
         raise ValueError({"email": "Invalid email address."})
     else:
         return email
