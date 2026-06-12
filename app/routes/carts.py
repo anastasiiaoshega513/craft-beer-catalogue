@@ -65,15 +65,21 @@ async def add_item(
     result = await db.execute(
         select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id)
     )
-    beer_item = result.scalar_one_or_none()
+    cart_item = result.scalar_one_or_none()
 
-    if beer_item is None:
-        beer_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=1)
-        db.add(beer_item)
+    if cart_item is None:
+        cart_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=1)
+        db.add(cart_item)
         await db.flush()
 
     else:
-        beer_item.amount += 1
+        if cart_item.amount >= beer.total_amount:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"beer_id": "Not enough beer in stock."},
+            )
+
+        cart_item.amount += 1
 
     await db.commit()
 
@@ -125,5 +131,27 @@ async def remove_item(
     await db.commit()
 
     cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    return await format_cart(cart)
+
+
+@router.delete("/", response_model=CartSchema)
+async def remove_all_items(
+    request: Request,
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    if cart is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"cart_id": "Cart not found."},
+        )
+
+    for item in cart.cart_items:
+        await db.delete(item)
+
+    await db.commit()
 
     return await format_cart(cart)
