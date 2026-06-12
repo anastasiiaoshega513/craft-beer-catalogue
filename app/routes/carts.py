@@ -9,7 +9,7 @@ from app.models.carts import Cart, CartItem
 from app.models.users import User
 from app.schemas.carts import CartSchema
 from app.services.carts import (
-    create_user_or_guest_cart,
+    get_or_create_user_or_guest_cart,
     format_cart,
     get_user_or_guest_cart,
 )
@@ -29,8 +29,7 @@ async def get_cart(
 ):
     cart = await get_user_or_guest_cart(request=request, user=user, db=db)
 
-    cart = await format_cart(cart=cart)
-    return cart
+    return await format_cart(cart)
 
 
 @router.post("/{beer_id}/", response_model=CartSchema)
@@ -58,7 +57,7 @@ async def add_item(
 
     cart = await get_user_or_guest_cart(request=request, user=user, db=db)
     if cart is None:
-        cart = await create_user_or_guest_cart(
+        cart = await get_or_create_user_or_guest_cart(
             request=request, user=user, db=db, response=response
         )
 
@@ -87,6 +86,7 @@ async def add_item(
         select(Cart)
         .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
         .where(Cart.id == cart.id)
+        .execution_options(populate_existing=True)
     )
 
     cart = result.scalar_one_or_none()
@@ -130,7 +130,14 @@ async def remove_item(
 
     await db.commit()
 
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+    result = await db.execute(
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
+        .where(Cart.id == cart.id)
+        .execution_options(populate_existing=True)
+    )
+
+    cart = result.scalar_one_or_none()
 
     return await format_cart(cart)
 
@@ -153,5 +160,14 @@ async def remove_all_items(
         await db.delete(item)
 
     await db.commit()
+
+    result = await db.execute(
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
+        .where(Cart.id == cart.id)
+        .execution_options(populate_existing=True)
+    )
+
+    cart = result.scalar_one_or_none()
 
     return await format_cart(cart)
