@@ -96,3 +96,14 @@ async def format_cart(cart: Cart | None) -> dict:
         "subtotal": subtotal,
         "total": total,
     }
+
+
+async def get_fresh_cart(cart_id: int, db: AsyncSession) -> Cart | None:
+    result = await db.execute(
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
+        .where(Cart.id == cart_id)
+        .execution_options(populate_existing=True)
+    )
+
+    return result.scalar_one_or_none()
