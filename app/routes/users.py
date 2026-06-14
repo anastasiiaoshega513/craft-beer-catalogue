@@ -214,7 +214,7 @@ async def login_user(
         value=refresh_token,
         max_age=COOKIE_MAX_AGE,
         httponly=True,
-        samesite="strict",
+        samesite="lax",
         secure=False,  # TODO change to True when we deploy
     )
 
