@@ -1,8 +1,8 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
-from app.dependencies.enums import BeerTypeEnum
+from app.dependencies.enums import BeerTypeEnum, EventTypeEnum
 
 
 class BeerBaseSchema(BaseModel):
@@ -17,6 +17,7 @@ class BeerBaseSchema(BaseModel):
     beer_type: BeerTypeEnum
     volume: int
     is_available: bool
+    event_type: list[EventTypeEnum] = Field(default_factory=list)
 
 
 class BeerListItemSchema(BeerBaseSchema):
