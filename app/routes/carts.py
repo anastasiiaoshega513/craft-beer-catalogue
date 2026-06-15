@@ -9,9 +9,9 @@ from app.models.users import User
 from app.schemas.carts import CartSchema
 from app.services.carts import (
     format_cart,
-    reload_and_format_cart,
     get_or_create_user_or_guest_cart,
     get_user_or_guest_cart,
+    reload_and_format_cart,
 )
 from db.dependencies import get_db
 
