@@ -82,6 +82,27 @@ async def add_item(
     return await reload_and_format_cart(cart=cart, db=db)
 
 
+@router.delete("/clear/", response_model=CartSchema)
+async def remove_all_items(
+    request: Request,
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    if cart is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"cart_id": "Cart not found."},
+        )
+
+    for item in cart.cart_items:
+        await db.delete(item)
+
+    await db.commit()
+    return await reload_and_format_cart(cart=cart, db=db)
+
+
 @router.delete("/{item_id}/", response_model=CartSchema)
 async def remove_item(
     item_id: int,
@@ -115,27 +136,6 @@ async def remove_item(
 
     if cart_item.amount <= 0:
         await db.delete(cart_item)
-
-    await db.commit()
-    return await reload_and_format_cart(cart=cart, db=db)
-
-
-@router.delete("/clear/", response_model=CartSchema)
-async def remove_all_items(
-    request: Request,
-    user: User | None = Depends(get_current_user_optional),
-    db: AsyncSession = Depends(get_db),
-):
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
-
-    for item in cart.cart_items:
-        await db.delete(item)
 
     await db.commit()
     return await reload_and_format_cart(cart=cart, db=db)
