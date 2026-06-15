@@ -8,7 +8,8 @@
     "is_filtered": false,
     "beer_type": "DARK",
     "volume": 440,
-    "total_amount": 7
+    "total_amount": 7,
+    "event_types": ["after-midnight", "friends-over"]
   },
   {
     "name": "Golden Hop Pilsner",
@@ -19,7 +20,8 @@
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 18
+    "total_amount": 18,
+    "event_types": ["after-work", "weekend-escape"]
   },
   {
     "name": "Cherry Dark Ale",
@@ -30,7 +32,8 @@
     "is_filtered": false,
     "beer_type": "DARK",
     "volume": 500,
-    "total_amount": 0
+    "total_amount": 0,
+    "event_types": ["dinner-and-drinks"]
   },
   {
     "name": "Summer Pale Ale",
@@ -41,7 +44,8 @@
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 330,
-    "total_amount": 15
+    "total_amount": 15,
+    "event_types": ["weekend-escape", "friends-over"]
   },
   {
     "name": "Imperial Cocoa Stout",
@@ -52,7 +56,8 @@
     "is_filtered": true,
     "beer_type": "DARK",
     "volume": 330,
-    "total_amount": 4
+    "total_amount": 4,
+    "event_types": ["after-midnight"]
   },
   {
     "name": "Amber Dawn Lager",
@@ -63,7 +68,8 @@
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 24
+    "total_amount": 24,
+    "event_types": ["after-work"]
   },
   {
     "name": "Dry Saison Gold",
@@ -74,7 +80,8 @@
     "is_filtered": false,
     "beer_type": "LIGHT",
     "volume": 330,
-    "total_amount": 14
+    "total_amount": 14,
+    "event_types": ["dinner-and-drinks", "weekend-escape"]
   },
   {
     "name": "Dark Velvet Porter",
@@ -85,7 +92,8 @@
     "is_filtered": true,
     "beer_type": "DARK",
     "volume": 500,
-    "total_amount": 16
+    "total_amount": 16,
+    "event_types": ["friends-over", "after-midnight"]
   },
   {
     "name": "Honey Blonde Ale",
@@ -96,7 +104,8 @@
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 12
+    "total_amount": 12,
+    "event_types": []
   },
   {
     "name": "Smoked Baltic Porter",
@@ -107,7 +116,8 @@
     "is_filtered": true,
     "beer_type": "DARK",
     "volume": 330,
-    "total_amount": 5
+    "total_amount": 5,
+    "event_types": ["dinner-and-drinks", "after-midnight"]
   },
   {
     "name": "Citrus Wheat Ale",
@@ -118,7 +128,8 @@
     "is_filtered": false,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 30
+    "total_amount": 30,
+    "event_types": ["after-work", "friends-over"]
   },
   {
     "name": "Black River Stout",
@@ -129,7 +140,8 @@
     "is_filtered": true,
     "beer_type": "DARK",
     "volume": 500,
-    "total_amount": 11
+    "total_amount": 11,
+    "event_types": []
   },
   {
     "name": "Nordic Light IPA",
@@ -140,7 +152,8 @@
     "is_filtered": true,
     "beer_type": "LIGHT",
     "volume": 440,
-    "total_amount": 9
+    "total_amount": 9,
+    "event_types": ["after-work", "weekend-escape", "friends-over"]
   },
   {
     "name": "Dark Forest Bock",
@@ -151,7 +164,8 @@
     "is_filtered": true,
     "beer_type": "DARK",
     "volume": 500,
-    "total_amount": 13
+    "total_amount": 13,
+    "event_types": ["dinner-and-drinks"]
   },
   {
     "name": "Hazy Farmhouse Ale",
@@ -162,6 +176,7 @@
     "is_filtered": false,
     "beer_type": "LIGHT",
     "volume": 500,
-    "total_amount": 0
+    "total_amount": 0,
+    "event_types": []
   }
 ]

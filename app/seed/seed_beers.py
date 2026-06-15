@@ -5,7 +5,8 @@ from pathlib import Path
 
 from sqlalchemy import delete
 
-from app.models.beer import Beer, BeerTypeEnum
+from app.dependencies.enums import BeerTypeEnum, EventTypeEnum
+from app.models.beer import Beer, BeerEventType
 from db.engine import AsyncSessionLocal
 
 
@@ -30,6 +31,10 @@ async def seed_beers() -> None:
                 volume=item["volume"],
                 total_amount=item["total_amount"],
             )
+            beer.event_types = [
+                BeerEventType(event_type=EventTypeEnum(event_type))
+                for event_type in item.get("event_types", [])
+            ]
             session.add(beer)
 
         await session.commit()
