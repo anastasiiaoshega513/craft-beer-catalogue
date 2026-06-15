@@ -3,9 +3,10 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import asc, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.dependencies.enums import AlcoholRangeEnum, BeerTypeEnum
-from app.models.beer import Beer
+from app.dependencies.enums import AlcoholRangeEnum, BeerTypeEnum, EventTypeEnum
+from app.models.beer import Beer, BeerEventType
 from app.schemas.beer import BeerDetailSchema, BeerListSchema
 from db.dependencies import get_db
 
@@ -19,8 +20,9 @@ router = APIRouter(
 async def get_beer_list(
     offset: int = Query(0, ge=0),
     search: str | None = Query(None, alias="search"),
-    beer_type: BeerTypeEnum | None = Query(None, alias="type"),
+    beer_type: BeerTypeEnum | None = Query(None, alias="beer_type"),
     alcohol_range: AlcoholRangeEnum | None = Query(None, alias="alcohol"),
+    event_type: EventTypeEnum | None = Query(None, alias="event_type"),
     filtered: bool = Query(None, alias="filtered"),
     sort_by: Literal["id", "price"] = "id",
     sort_order: Literal["asc", "desc"] = "asc",
@@ -34,7 +36,7 @@ async def get_beer_list(
     filters = []
 
     if beer_type is not None:
-        filters.append(Beer.beer_type == beer_type.value)
+        filters.append(Beer.beer_type == beer_type)
 
     if alcohol_range == AlcoholRangeEnum.FOUR_SIX:
         filters.append(Beer.alcohol_percentage >= 4)
@@ -44,6 +46,9 @@ async def get_beer_list(
         filters.append(Beer.alcohol_percentage < 8)
     elif alcohol_range == AlcoholRangeEnum.EIGHT_PLUS:
         filters.append(Beer.alcohol_percentage >= 8)
+
+    if event_type is not None:
+        filters.append(Beer.event_types.any(BeerEventType.event_type == event_type))
 
     if filtered is not None:
         filters.append(Beer.is_filtered.is_(filtered))
@@ -55,7 +60,7 @@ async def get_beer_list(
     limit = 6
 
     result = await db.execute(
-        select(Beer).order_by(order_by).where(*filters).offset(offset).limit(limit + 1)
+        select(Beer).options(selectinload(Beer.event_types)).order_by(order_by).where(*filters).offset(offset).limit(limit + 1)
     )
 
     beers = result.scalars().all()
@@ -74,7 +79,7 @@ async def get_beer_list(
 
 @router.get("/{beer_id}/", response_model=BeerDetailSchema)
 async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Beer).where(Beer.id == beer_id))
+    result = await db.execute(select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id))
     beer = result.scalar_one_or_none()
 
     if beer is None:
