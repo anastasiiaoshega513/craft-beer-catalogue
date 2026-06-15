@@ -7,10 +7,21 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    ForeignKey,
 )
+from sqlalchemy.orm import relationship
 
-from app.dependencies.enums import BeerTypeEnum
+from app.dependencies.enums import BeerTypeEnum, EventTypeEnum
 from db.engine import Base
+
+
+class BeerEventType(Base):
+    __tablename__ = "beer_event_types"
+
+    beer_id = Column(Integer, ForeignKey("beers.id", ondelete="CASCADE"), primary_key=True)
+    event_type = Column(Enum(EventTypeEnum), primary_key=True, nullable=False)
+
+    beer = relationship("Beer", back_populates="event_types")
 
 
 class Beer(Base):
@@ -31,6 +42,16 @@ class Beer(Base):
     beer_type = Column(Enum(BeerTypeEnum), nullable=False)
     volume = Column(Integer, nullable=False)
     total_amount = Column(Integer, nullable=False, default=0)
+
+    event_types = relationship(
+        "BeerEventType",
+        back_populates="beer",
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def event_type(self) -> list[EventTypeEnum]:
+        return [event.event_type for event in self.event_types]
 
     @property
     def is_available(self) -> bool:
