@@ -7,6 +7,7 @@ class CartItemSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    beer_id: int
     name: str
     quantity: int
     price: Decimal
