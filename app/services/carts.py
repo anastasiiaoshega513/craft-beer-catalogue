@@ -78,6 +78,7 @@ async def format_cart(cart: Cart | None) -> dict:
         items.append(
             {
                 "id": item.id,
+                "beer_id": item.beer.id,
                 "name": item.beer.name,
                 "quantity": item.amount,
                 "price": item.beer.price,
