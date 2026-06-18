@@ -1,13 +1,11 @@
 import asyncio
 
-from db.engine import AsyncSessionLocal
-
-from app.models.users import User
-from app.models.carts import Cart, CartItem
 from app.models.beer import Beer, BeerEventType
-from app.models.tokens import RefreshToken, PasswordResetToken, ActivationToken
-
+from app.models.carts import Cart, CartItem
+from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
+from app.models.users import User
 from app.services.tokens import cleanup_expired_tokens
+from db.engine import AsyncSessionLocal
 
 
 async def main() -> None:

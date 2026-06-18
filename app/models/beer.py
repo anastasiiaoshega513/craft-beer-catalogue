@@ -3,11 +3,11 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     Enum,
+    ForeignKey,
     Integer,
     Numeric,
     String,
     Text,
-    ForeignKey,
 )
 from sqlalchemy.orm import relationship
 
