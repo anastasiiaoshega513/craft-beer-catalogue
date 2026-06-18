@@ -1,16 +1,17 @@
 """Cleanup helpers for expired tokens and stale unactivated accounts."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
 from app.models.users import User
+from app.services.users import utc_now_naive
 
 
 async def cleanup_expired_tokens(db: AsyncSession) -> None:
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = utc_now_naive()
     yesterday = now - timedelta(days=1)
 
     await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < now))
