@@ -27,8 +27,10 @@ def test_verify_incorrect_password_returns_false(user):
     assert user.verify_password("WrongPass123!") is False
 
 
-# 3. Write-only password field
-# Reading user.password should raise AttributeError.
+def test_password_read_raises_attribute_error(user):
+    with pytest.raises(AttributeError):
+        user.password
+
 
 # 4. Weak password validation
 # User.create() should raise ValueError when the password is too weak.
