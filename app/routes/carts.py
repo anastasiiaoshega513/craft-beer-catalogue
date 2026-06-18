@@ -21,7 +21,15 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=CartSchema)
+@router.get(
+    "/",
+    response_model=CartSchema,
+    summary="Get cart",
+    description=(
+        "Return the current authenticated or guest cart. "
+        "Does not create a cart or guest cookie if they do not already exist."
+    ),
+)
 async def get_cart(
     request: Request,
     user: User | None = Depends(get_current_user_optional),
@@ -32,14 +40,31 @@ async def get_cart(
     return await format_cart(cart)
 
 
-@router.post("/{beer_id}/", response_model=CartSchema)
-async def add_item(
+@router.post(
+    "/{beer_id}/",
+    response_model=CartSchema,
+    summary="Add beer to cart",
+    description=(
+        "Add one beer item to the current cart. Creates a guest cart and guest_id "
+        "cookie when the user is not authenticated and no guest cart exists."
+    ),
+    responses={
+        404: {"description": "Beer not found."},
+        409: {"description": "Beer is out of stock or requested amount exceeds stock."},
+    },
+)
+async def add_cart_item(
     beer_id: int,
     request: Request,
     response: Response,
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
+    """
+    Add one beer to the user's or guest's cart.
+
+    Checks beer existence and stock before creating or updating a cart item.
+    """
     result = await db.execute(select(Beer).where(Beer.id == beer_id))
     beer = result.scalar_one_or_none()
 
@@ -82,8 +107,16 @@ async def add_item(
     return await reload_and_format_cart(cart=cart, db=db)
 
 
-@router.delete("/clear/", response_model=CartSchema)
-async def remove_all_items(
+@router.delete(
+    "/clear/",
+    response_model=CartSchema,
+    summary="Clear cart",
+    description="Remove all items from the current authenticated or guest cart.",
+    responses={
+        404: {"description": "Cart not found."},
+    },
+)
+async def clear_cart(
     request: Request,
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
@@ -103,8 +136,19 @@ async def remove_all_items(
     return await reload_and_format_cart(cart=cart, db=db)
 
 
-@router.delete("/{item_id}/", response_model=CartSchema)
-async def remove_item(
+@router.delete(
+    "/{item_id}/",
+    response_model=CartSchema,
+    summary="Decrease cart item quantity",
+    description=(
+        "Decrease a cart item quantity by one. Deletes the cart item when "
+        "its quantity reaches zero."
+    ),
+    responses={
+        404: {"description": "Cart or cart item not found."},
+    },
+)
+async def remove_cart_item(
     item_id: int,
     request: Request,
     user: User | None = Depends(get_current_user_optional),
