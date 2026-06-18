@@ -7,6 +7,8 @@ from db.engine import Base
 
 
 class User(Base):
+    """User account model with write-only password handling and related auth records."""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -44,7 +46,7 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
 
     @classmethod
@@ -55,12 +57,14 @@ class User(Base):
         first_name: str | None = None,
         last_name: str | None = None,
     ) -> "User":
+        """Create a user and hash the raw password through the password setter."""
         user = cls(email=email, first_name=first_name, last_name=last_name)
         user.password = raw_password
         return user
 
     @property
     def password(self) -> None:
+        """Prevent reading password values from the user model."""
         raise AttributeError(
             "Password is write-only. Use the setter to set the password."
         )
@@ -71,14 +75,17 @@ class User(Base):
         self._hashed_password = hash_password(raw_password)
 
     def verify_password(self, raw_password: str) -> bool:
+        """Check a raw password against the stored password hash."""
         return verify_password(raw_password, self._hashed_password)
 
     @validates("email")
-    def validate_email(self, key, value):
+    def validate_email(self, key: str, value: str) -> str:
+        """Normalize and validate email addresses assigned to the model."""
         return validators.validate_email(value.lower())
 
     @validates("first_name", "last_name")
-    def validate_name(self, key, value):
+    def validate_name(self, key: str, value: str | None) -> str | None:
+        """Normalize and validate first and last names assigned to the model."""
         if value is None:
             return value
 

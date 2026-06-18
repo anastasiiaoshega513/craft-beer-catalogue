@@ -5,6 +5,12 @@ from db.engine import Base
 
 
 class CartItem(Base):
+    """
+    Store one beer line in a cart.
+
+    The same beer can appear only once per cart; the amount field stores its quantity.
+    """
+
     __tablename__ = "cart_items"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -21,13 +27,15 @@ class CartItem(Base):
         UniqueConstraint("cart_id", "beer_id", name="uq_cart_item_cart_id_beer_id"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<CartItem(id={self.id}, cart_id={self.cart_id}, beer_id={self.beer_id})>"
         )
 
 
 class Cart(Base):
+    """Shopping cart owned either by an authenticated user or by a guest cookie."""
+
     __tablename__ = "carts"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -42,7 +50,7 @@ class Cart(Base):
         cascade="all, delete-orphan",
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         owner = (
             f"user_id={self.user_id}"
             if self.user_id is not None

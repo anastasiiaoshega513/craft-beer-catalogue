@@ -23,7 +23,12 @@ async def _get_user_from_credentials(
     credentials: HTTPAuthorizationCredentials,
     db: AsyncSession,
 ) -> User:
+    """
+    Decode access token credentials and return an active user.
 
+    Raises 401 for invalid or expired tokens and for tokens that do not match
+    an existing user. Raises 403 if the user account exists but is not active.
+    """
     token = credentials.credentials
 
     try:
@@ -57,6 +62,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
+    """Return the current authenticated active user."""
     return await _get_user_from_credentials(credentials, db)
 
 
@@ -64,6 +70,12 @@ async def get_current_user_optional(
     credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User | None:
+    """
+    Return the current user when credentials are provided, otherwise return None.
+
+    Missing credentials are allowed for guest access. Invalid credentials still
+    raise an authentication error instead of falling back to guest access.
+    """
     if credentials is None:
         return None
 

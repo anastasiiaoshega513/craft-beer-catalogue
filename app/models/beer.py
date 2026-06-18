@@ -16,6 +16,8 @@ from db.engine import Base
 
 
 class BeerEventType(Base):
+    """Store one event type assigned to a beer."""
+
     __tablename__ = "beer_event_types"
 
     beer_id = Column(
@@ -24,6 +26,9 @@ class BeerEventType(Base):
     event_type = Column(Enum(EventTypeEnum), primary_key=True, nullable=False)
 
     beer = relationship("Beer", back_populates="event_types")
+
+    def __repr__(self) -> str:
+        return f"<BeerEventType={self.event_type}, beer_id={self.beer_id}>"
 
 
 class Beer(Base):
@@ -53,11 +58,13 @@ class Beer(Base):
 
     @property
     def event_type(self) -> list[EventTypeEnum]:
+        """Return event type enum values instead of BeerEventType relationship objects."""
         return [event.event_type for event in self.event_types]
 
     @property
     def is_available(self) -> bool:
+        """Return whether the beer has stock available for cart operations."""
         return self.total_amount > 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Beer={self.name}>"

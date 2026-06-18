@@ -8,6 +8,13 @@ from db.engine import Base
 
 
 class BaseToken(Base):
+    """
+    Base model for raw user tokens that expire by default after one day.
+
+    Used by activation and password reset tokens, where each user can have
+    only one active token of that type.
+    """
+
     __abstract__ = True
 
     id = Column(Integer, primary_key=True)
@@ -26,24 +33,30 @@ class BaseToken(Base):
 
 
 class ActivationToken(BaseToken):
+    """Token used to activate a newly registered user account."""
+
     __tablename__ = "activation_tokens"
 
     user = relationship("User", back_populates="activation_token")
 
-    def __repr__(self):
-        return f"<ActivationTokenModel(id={self.id}, token={self.token}, expires_at={self.expires_at})>"
+    def __repr__(self) -> str:
+        return f"<ActivationTokenModel(id={self.id}, user_id={self.user_id}, expires_at={self.expires_at})>"
 
 
 class PasswordResetToken(BaseToken):
+    """Token used to authorize a password reset request."""
+
     __tablename__ = "password_reset_tokens"
 
     user = relationship("User", back_populates="password_reset_token")
 
-    def __repr__(self):
-        return f"<PasswordResetTokenModel(id={self.id}, token={self.token}, expires_at={self.expires_at})>"
+    def __repr__(self) -> str:
+        return f"<PasswordResetTokenModel(id={self.id}, user_id={self.user_id}, expires_at={self.expires_at})>"
 
 
 class RefreshToken(Base):
+    """Hashed refresh token record used to issue new access tokens."""
+
     __tablename__ = "refresh_tokens"
 
     id = Column(Integer, primary_key=True)
@@ -58,5 +71,5 @@ class RefreshToken(Base):
 
     user = relationship("User", back_populates="refresh_tokens")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<RefreshToken(id={self.id}, user_id={self.user_id}, expires_at={self.expires_at})>"
