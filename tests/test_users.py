@@ -1,8 +1,27 @@
-# 1. User creation
-# User.create() should create a User instance.
-# The email should be normalized to lowercase.
-# The raw password should not be stored in hashed_password.
-# verify_password() should return True for the correct password.
+import pytest
+
+from app.models.users import User
+from app.models.carts import Cart, CartItem
+from app.models.beer import Beer, BeerEventType
+from app.models.tokens import RefreshToken, PasswordResetToken, ActivationToken
+
+
+@pytest.fixture
+def user():
+    return User.create(
+        email="TEST@EMAIL.COM",
+        raw_password="StrongPass123!",
+        first_name="Test",
+        last_name="User",
+    )
+
+
+def test_user_create_with_email_lower_and_correct_hashed_password(user):
+    assert isinstance(user, User)
+    assert user.email == "test@email.com"
+    assert user._hashed_password != "StrongPass123!"
+    assert user.verify_password("StrongPass123!") is True
+
 
 # 2. Wrong password check
 # verify_password() should return False for an incorrect password.
