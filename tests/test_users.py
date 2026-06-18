@@ -1,9 +1,10 @@
 import pytest
 
-from app.models.users import User
-from app.models.carts import Cart, CartItem
 from app.models.beer import Beer, BeerEventType
-from app.models.tokens import RefreshToken, PasswordResetToken, ActivationToken
+from app.models.carts import Cart, CartItem
+from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
+from app.models.users import User
+from app.security.secure_token import hash_token
 
 
 @pytest.fixture
@@ -39,6 +40,16 @@ def test_user_creation_with_weak_password_raises_value_error(user):
             raw_password="weak",
         )
 
-# 5. Token hashing
-# hash_token() should return the same hash for the same token.
-# hash_token() should return different hashes for different tokens.
+
+def test_token_is_hashed_correctly():
+    token = "test-token"
+    same_token = "test-token"
+    another_token = "another-token"
+
+    token_hash = hash_token(token)
+    same_token_hash = hash_token(same_token)
+    another_token_hash = hash_token(another_token)
+
+    assert token_hash == same_token_hash
+    assert token_hash != another_token_hash
+    assert token_hash != token
