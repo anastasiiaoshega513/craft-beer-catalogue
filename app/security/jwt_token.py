@@ -2,42 +2,23 @@
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import HTTPException, Request, status
 from jose import ExpiredSignatureError, JWTError, jwt
 
 
 class TokenExpiredError(Exception):
+    """Raised when a JWT has expired."""
+
     pass
 
 
 class InvalidTokenError(Exception):
+    """Raised when a JWT is invalid or cannot be decoded."""
+
     pass
 
 
-def get_token(request: Request) -> str:
-
-    authorization: str | None = request.headers.get("Authorization")
-
-    if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"authorization": "Authorization header is missing"},
-        )
-
-    scheme, _, token = authorization.partition(" ")
-
-    if scheme.lower() != "bearer" or not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={
-                "authorization": "Invalid Authorization header format. Expected 'Bearer <token>'"
-            },
-        )
-
-    return token
-
-
 class JWTAuthManager:
+    """Create and decode JWT access and refresh tokens."""
 
     _ALGORITHM = "HS256"
     _ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -50,14 +31,14 @@ class JWTAuthManager:
     def _create_token(
         self, data: dict, secret_key: str, expires_delta: timedelta
     ) -> str:
-
+        """Create a signed JWT with an expiration claim."""
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + expires_delta
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, secret_key, algorithm=self._ALGORITHM)
 
     def create_access_token(self, data: dict) -> str:
-
+        """Create a short-lived access token."""
         return self._create_token(
             data,
             self._secret_key_access,
@@ -65,7 +46,7 @@ class JWTAuthManager:
         )
 
     def create_refresh_token(self, data: dict) -> str:
-
+        """Create a refresh token used to request new access tokens."""
         return self._create_token(
             data,
             self._secret_key_refresh,
@@ -73,23 +54,23 @@ class JWTAuthManager:
         )
 
     def decode_access_token(self, token: str) -> dict:
-
+        """Decode and validate an access token."""
         try:
             return jwt.decode(
                 token, self._secret_key_access, algorithms=[self._ALGORITHM]
             )
         except ExpiredSignatureError:
-            raise TokenExpiredError
+            raise TokenExpiredError()
         except JWTError:
-            raise InvalidTokenError
+            raise InvalidTokenError()
 
     def decode_refresh_token(self, token: str) -> dict:
-
+        """Decode and validate a refresh token."""
         try:
             return jwt.decode(
                 token, self._secret_key_refresh, algorithms=[self._ALGORITHM]
             )
         except ExpiredSignatureError:
-            raise TokenExpiredError
+            raise TokenExpiredError()
         except JWTError:
-            raise InvalidTokenError
+            raise InvalidTokenError()

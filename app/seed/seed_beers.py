@@ -13,9 +13,15 @@ from db.engine import AsyncSessionLocal
 
 
 async def seed_beers() -> None:
-    file_path = Path(__file__).parent / "beers_seed.json"
+    """
+    Replace existing beers with sample beer catalogue data.
 
-    with open(file_path, "r", encoding="utf-8") as file:
+    Loads beer data from beers_seed.json, deletes current beer records, and
+    creates beers with their event type assignments.
+    """
+    seed_file_path = Path(__file__).parent / "beers_seed.json"
+
+    with seed_file_path.open("r", encoding="utf-8") as file:
         beers_data = json.load(file)
 
     async with AsyncSessionLocal() as session:
