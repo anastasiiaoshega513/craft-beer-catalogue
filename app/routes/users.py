@@ -311,6 +311,12 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(get_
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
 
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"refresh_token": "Invalid or expired refresh token."},
+        )
+
     access_token = jwt_manager.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
