@@ -69,15 +69,6 @@ async def test_cart_items_and_totals_are_formatted_correctly(
     ]
     result = await format_cart(cart)
 
-    expected_item = {
-        "id": cart_item_positive_amount.id,
-        "beer_id": cart_item_positive_amount.beer.id,
-        "name": cart_item_positive_amount.beer.name,
-        "quantity": cart_item_positive_amount.amount,
-        "price": cart_item_positive_amount.beer.price,
-        "image_url": cart_item_positive_amount.beer.image_url,
-    }
-
     expected_subtotal = (
         cart_item_positive_amount.beer.price * cart_item_positive_amount.amount
     )
@@ -87,7 +78,6 @@ async def test_cart_items_and_totals_are_formatted_correctly(
     assert cart_item_positive_amount.id in returned_item_ids
     assert cart_item_zero_amount.id not in returned_item_ids
     assert result["id"] == cart.id
-
     assert result["total"] == expected_subtotal + 5
 
 
