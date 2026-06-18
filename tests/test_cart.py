@@ -96,10 +96,6 @@ async def test_invalid_cart_item_amounts_are_ignored(cart, cart_item_zero_amount
     assert result["subtotal"] == 0
     assert result["total"] == 0
 
-# 3. Invalid cart item amounts
-# format_cart() should ignore cart items with amount less than or equal to 0.
-# If all cart items are ignored, subtotal and total should be 0.
-
 # 4. Existing guest cookie
 # get_or_create_guest_id() should return the existing guest_id from request cookies.
 # It should not set a new cookie when guest_id already exists.
