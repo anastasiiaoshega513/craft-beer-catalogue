@@ -17,7 +17,10 @@ class BeerBaseSchema(BaseModel):
     beer_type: BeerTypeEnum
     volume: int
     is_available: bool
-    event_type: list[EventTypeEnum] = Field(default_factory=list)
+    event_type: list[EventTypeEnum] = Field(
+        default_factory=list,
+        description="Event categories assigned to the beer.",
+    )
 
 
 class BeerListItemSchema(BeerBaseSchema):
@@ -28,9 +31,11 @@ class BeerListSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     beers: list[BeerListItemSchema]
-    next_offset: int | None = None
+    next_offset: int | None = Field(
+        default=None,
+        description="Offset for the next page. Null when there are no more beers.",
+    )
 
 
 class BeerDetailSchema(BeerBaseSchema):
-
     description: str

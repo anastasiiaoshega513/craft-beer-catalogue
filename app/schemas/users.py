@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, Field
 
 
 class MessageResponseSchema(BaseModel):
@@ -31,12 +33,12 @@ class UserRegistrationSchema(EmailSchema, PasswordSchema):
 
 
 class UserActivationSchema(BaseModel):
-    token: str
+    token: str = Field(min_length=1)
 
 
 class AccessTokenSchema(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: Literal["bearer"] = "bearer"
 
 
 class UserMeSchema(BaseModel):
@@ -57,4 +59,4 @@ class PasswordResetRequestSchema(EmailSchema):
 
 
 class PasswordResetCompleteRequestSchema(PasswordSchema):
-    token: str
+    token: str = Field(min_length=1)
