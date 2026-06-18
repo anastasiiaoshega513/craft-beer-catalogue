@@ -15,19 +15,35 @@ router = APIRouter(
     tags=["Beers"],
 )
 
+BEER_PAGE_SIZE = 6
 
-@router.get("/", response_model=BeerListSchema)
+
+@router.get(
+    "/",
+    response_model=BeerListSchema,
+    summary="Get beer list",
+    description=(
+        "Return a paginated beer list with optional search, filtering, and sorting."
+    ),
+)
 async def get_beer_list(
     offset: int = Query(0, ge=0),
     search: str | None = Query(None, alias="search"),
     beer_type: BeerTypeEnum | None = Query(None, alias="beer_type"),
     alcohol_range: AlcoholRangeEnum | None = Query(None, alias="alcohol"),
     event_type: EventTypeEnum | None = Query(None, alias="event_type"),
-    filtered: bool = Query(None, alias="filtered"),
+    filtered: bool | None = Query(None, alias="filtered"),
     sort_by: Literal["id", "price"] = "id",
     sort_order: Literal["asc", "desc"] = "asc",
     db: AsyncSession = Depends(get_db),
 ):
+    """
+    Return beers for the catalogue page.
+
+    Supports search by name, filtering by beer type, alcohol range, event type,
+    and featured status. Uses limit-plus-one pagination to calculate next_offset.
+    """
+
     if sort_order == "asc":
         order_by = asc(sort_by)
     else:
@@ -53,11 +69,12 @@ async def get_beer_list(
     if filtered is not None:
         filters.append(Beer.is_filtered.is_(filtered))
 
-    if search:
-        search_pattern = f"%{search.strip()}%"
-        filters.append(Beer.name.ilike(search_pattern))
+    if search is not None:
+        search = search.strip()
 
-    limit = 6
+        if search:
+            search_pattern = f"%{search}%"
+            filters.append(Beer.name.ilike(search_pattern))
 
     result = await db.execute(
         select(Beer)
@@ -65,14 +82,14 @@ async def get_beer_list(
         .order_by(order_by)
         .where(*filters)
         .offset(offset)
-        .limit(limit + 1)
+        .limit(BEER_PAGE_SIZE + 1)
     )
 
     beers = result.scalars().all()
 
-    if len(beers) > limit:
-        beers = beers[:limit]
-        next_offset = offset + limit
+    if len(beers) > BEER_PAGE_SIZE:
+        beers = beers[:BEER_PAGE_SIZE]
+        next_offset = offset + BEER_PAGE_SIZE
     else:
         next_offset = None
 
@@ -82,7 +99,20 @@ async def get_beer_list(
     }
 
 
-@router.get("/{beer_id}/", response_model=BeerDetailSchema)
+@router.get(
+    "/{beer_id}/",
+    response_model=BeerDetailSchema,
+    summary="Get beer details",
+    description="Return detailed information for one beer by id.",
+    responses={
+        404: {
+            "description": "Beer not found.",
+            "content": {
+                "application/json": {"example": {"detail": {"beer": "Beer not found"}}}
+            },
+        },
+    },
+)
 async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id)
