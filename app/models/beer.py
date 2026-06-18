@@ -18,7 +18,9 @@ from db.engine import Base
 class BeerEventType(Base):
     __tablename__ = "beer_event_types"
 
-    beer_id = Column(Integer, ForeignKey("beers.id", ondelete="CASCADE"), primary_key=True)
+    beer_id = Column(
+        Integer, ForeignKey("beers.id", ondelete="CASCADE"), primary_key=True
+    )
     event_type = Column(Enum(EventTypeEnum), primary_key=True, nullable=False)
 
     beer = relationship("Beer", back_populates="event_types")

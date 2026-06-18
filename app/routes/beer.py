@@ -60,7 +60,12 @@ async def get_beer_list(
     limit = 6
 
     result = await db.execute(
-        select(Beer).options(selectinload(Beer.event_types)).order_by(order_by).where(*filters).offset(offset).limit(limit + 1)
+        select(Beer)
+        .options(selectinload(Beer.event_types))
+        .order_by(order_by)
+        .where(*filters)
+        .offset(offset)
+        .limit(limit + 1)
     )
 
     beers = result.scalars().all()
@@ -79,7 +84,9 @@ async def get_beer_list(
 
 @router.get("/{beer_id}/", response_model=BeerDetailSchema)
 async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id))
+    result = await db.execute(
+        select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id)
+    )
     beer = result.scalar_one_or_none()
 
     if beer is None:
