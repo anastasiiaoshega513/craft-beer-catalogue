@@ -32,8 +32,12 @@ def test_password_read_raises_attribute_error(user):
         user.password
 
 
-# 4. Weak password validation
-# User.create() should raise ValueError when the password is too weak.
+def test_user_creation_with_weak_password_raises_value_error(user):
+    with pytest.raises(ValueError):
+        User.create(
+            email="test@email.com",
+            raw_password="weak",
+        )
 
 # 5. Token hashing
 # hash_token() should return the same hash for the same token.
