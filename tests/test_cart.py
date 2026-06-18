@@ -1,7 +1,7 @@
 from decimal import Decimal
-from fastapi import Request, Response
 
 import pytest
+from fastapi import Request, Response
 
 from app.models.beer import Beer, BeerEventType
 from app.models.carts import Cart, CartItem
@@ -18,6 +18,7 @@ def cart():
         user_id=1,
     )
 
+
 @pytest.fixture
 def cart_item_zero_amount():
     return CartItem(
@@ -26,6 +27,7 @@ def cart_item_zero_amount():
         beer_id=1,
         amount=0,
     )
+
 
 @pytest.fixture
 def cart_item_positive_amount():
@@ -44,6 +46,7 @@ def cart_item_positive_amount():
         beer=beer,
     )
 
+
 @pytest.mark.asyncio
 async def test_format_non_existing_cart_should_return_empty_cart():
     result = await format_cart(None)
@@ -57,7 +60,9 @@ async def test_format_non_existing_cart_should_return_empty_cart():
 
 
 @pytest.mark.asyncio
-async def test_cart_items_and_totals_are_formatted_correctly(cart, cart_item_positive_amount, cart_item_zero_amount):
+async def test_cart_items_and_totals_are_formatted_correctly(
+    cart, cart_item_positive_amount, cart_item_zero_amount
+):
     cart.cart_items = [
         cart_item_positive_amount,
         cart_item_zero_amount,
@@ -74,8 +79,7 @@ async def test_cart_items_and_totals_are_formatted_correctly(cart, cart_item_pos
     }
 
     expected_subtotal = (
-        cart_item_positive_amount.beer.price
-        * cart_item_positive_amount.amount
+        cart_item_positive_amount.beer.price * cart_item_positive_amount.amount
     )
 
     returned_item_ids = [item["id"] for item in result["cart_items"]]
@@ -117,7 +121,17 @@ def test_existing_guest_cookie_should_be_returned_without_setting_new_cookie():
     assert "set-cookie" not in response.headers
 
 
-# 5. New guest cookie
-# get_or_create_guest_id() should generate a new guest_id when the request has no guest_id cookie.
-# It should set the guest_id cookie on the response with the expected cookie options.
-# It should return the generated guest_id.
+def test_new_guest_cookie_should_be_set_and_returned():
+    request = Request(
+        {
+            "type": "http",
+            "headers": [],
+        }
+    )
+    response = Response()
+
+    result = get_or_create_guest_id(request, response)
+
+    assert result
+    assert "set-cookie" in response.headers
+    assert f"guest_id={result}" in response.headers["set-cookie"]
