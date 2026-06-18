@@ -20,6 +20,7 @@ def cart():
 @pytest.fixture
 def cart_item_zero_amount():
     return CartItem(
+        id=1,
         cart_id=1,
         beer_id=1,
         amount=0,
@@ -35,6 +36,7 @@ def cart_item_positive_amount():
     )
 
     return CartItem(
+        id=2,
         cart_id=1,
         beer_id=2,
         amount=3,
@@ -53,11 +55,46 @@ async def test_format_non_existing_cart_should_return_empty_cart():
     }
 
 
-# 2. Cart items formatting and totals
-# format_cart() should include only valid cart items.
-# Each item should contain id, beer_id, name, quantity, price, and image_url.
-# subtotal should be calculated as price * quantity.
-# total should include the delivery fee when the cart has at least one valid item.
+@pytest.mark.asyncio
+async def test_cart_items_and_totals_are_formatted_correctly(cart, cart_item_positive_amount, cart_item_zero_amount):
+    cart.cart_items = [
+        cart_item_positive_amount,
+        cart_item_zero_amount,
+    ]
+    result = await format_cart(cart)
+
+    expected_item = {
+        "id": cart_item_positive_amount.id,
+        "beer_id": cart_item_positive_amount.beer.id,
+        "name": cart_item_positive_amount.beer.name,
+        "quantity": cart_item_positive_amount.amount,
+        "price": cart_item_positive_amount.beer.price,
+        "image_url": cart_item_positive_amount.beer.image_url,
+    }
+
+    expected_subtotal = (
+        cart_item_positive_amount.beer.price
+        * cart_item_positive_amount.amount
+    )
+
+    returned_item_ids = [item["id"] for item in result["cart_items"]]
+
+    assert cart_item_positive_amount.id in returned_item_ids
+    assert cart_item_zero_amount.id not in returned_item_ids
+    assert result["id"] == cart.id
+
+    assert result["total"] == expected_subtotal + 5
+
+
+@pytest.mark.asyncio
+async def test_invalid_cart_item_amounts_are_ignored(cart, cart_item_zero_amount):
+    cart.cart_items = [cart_item_zero_amount]
+
+    result = await format_cart(cart)
+
+    assert result["cart_items"] == []
+    assert result["subtotal"] == 0
+    assert result["total"] == 0
 
 # 3. Invalid cart item amounts
 # format_cart() should ignore cart items with amount less than or equal to 0.
