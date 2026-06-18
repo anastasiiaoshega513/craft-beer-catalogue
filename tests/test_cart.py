@@ -1,4 +1,5 @@
 from decimal import Decimal
+from fastapi import Request, Response
 
 import pytest
 
@@ -6,8 +7,8 @@ from app.models.beer import Beer, BeerEventType
 from app.models.carts import Cart, CartItem
 from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
 from app.models.users import User
-from services.carts import format_cart
-from tests.test_beers import available_beer
+from app.security.guest_user import get_or_create_guest_id
+from app.services.carts import format_cart
 
 
 @pytest.fixture
@@ -96,9 +97,25 @@ async def test_invalid_cart_item_amounts_are_ignored(cart, cart_item_zero_amount
     assert result["subtotal"] == 0
     assert result["total"] == 0
 
-# 4. Existing guest cookie
-# get_or_create_guest_id() should return the existing guest_id from request cookies.
-# It should not set a new cookie when guest_id already exists.
+
+def test_existing_guest_cookie_should_be_returned_without_setting_new_cookie():
+    existing_guest_id = "existing-guest-id"
+
+    request = Request(
+        {
+            "type": "http",
+            "headers": [
+                (b"cookie", f"guest_id={existing_guest_id}".encode()),
+            ],
+        }
+    )
+    response = Response()
+
+    result = get_or_create_guest_id(request, response)
+
+    assert result == existing_guest_id
+    assert "set-cookie" not in response.headers
+
 
 # 5. New guest cookie
 # get_or_create_guest_id() should generate a new guest_id when the request has no guest_id cookie.
