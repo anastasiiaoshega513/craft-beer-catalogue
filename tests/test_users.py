@@ -23,8 +23,9 @@ def test_user_create_with_email_lower_and_correct_hashed_password(user):
     assert user.verify_password("StrongPass123!") is True
 
 
-# 2. Wrong password check
-# verify_password() should return False for an incorrect password.
+def test_verify_incorrect_password_returns_false(user):
+    assert user.verify_password("WrongPass123!") is False
+
 
 # 3. Write-only password field
 # Reading user.password should raise AttributeError.
