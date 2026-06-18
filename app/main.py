@@ -1,3 +1,5 @@
+"""FastAPI application entry point and global app configuration."""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

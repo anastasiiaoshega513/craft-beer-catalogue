@@ -1,3 +1,5 @@
+"""Enums used for beer catalogue data and filters."""
+
 from enum import StrEnum, auto
 
 

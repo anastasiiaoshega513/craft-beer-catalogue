@@ -1,3 +1,5 @@
+"""Dependencies for required and optional user authentication."""
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select

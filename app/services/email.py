@@ -1,3 +1,5 @@
+"""Email sending helpers for account-related notifications."""
+
 import smtplib
 from email.message import EmailMessage
 

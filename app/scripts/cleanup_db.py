@@ -1,3 +1,5 @@
+"""Database cleanup script for expired tokens and unactivated user accounts."""
+
 import asyncio
 
 from app.models.beer import Beer, BeerEventType

@@ -1,3 +1,5 @@
+"""JWT access and refresh token creation and validation utilities."""
+
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Request, status

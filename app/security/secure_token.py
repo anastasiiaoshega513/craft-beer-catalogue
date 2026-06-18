@@ -1,3 +1,5 @@
+"""Secure random token generation and hashing utilities."""
+
 import hashlib
 import secrets
 

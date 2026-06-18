@@ -1,3 +1,5 @@
+"""Helpers for creating and reading guest cart cookies."""
+
 from uuid import uuid4
 
 from fastapi import Request, Response

@@ -1,3 +1,5 @@
+"""Cleanup helpers for expired tokens and stale unactivated accounts."""
+
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import delete, select

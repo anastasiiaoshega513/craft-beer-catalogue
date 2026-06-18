@@ -1,3 +1,10 @@
+"""Cart lookup, creation, and response formatting shared by cart routes.
+
+Authenticated users are matched by user_id, while guests are matched by the guest_id
+cookie. Read-only cart lookup does not create a cookie or a cart; creation happens
+only when a cart is needed for a write operation.
+"""
+
 from fastapi import Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

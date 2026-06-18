@@ -35,7 +35,7 @@ def validate_email(user_email: str) -> str:
         return email
 
 
-def validate_name(name: str, field: str):
+def validate_name(name: str, field: str) -> str:
     if re.search(r"^[A-Za-z]*$", name) is None:
         raise ValueError({field: "Only English letters are allowed."})
     return name

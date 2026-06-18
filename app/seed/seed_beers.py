@@ -1,3 +1,5 @@
+"""Seed the local database with sample beer catalogue data."""
+
 import asyncio
 import json
 from decimal import Decimal
