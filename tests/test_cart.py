@@ -1,6 +1,57 @@
-# 1. Empty cart formatting
-# format_cart(None) should return an empty cart response.
-# The response should contain id=None, an empty cart_items list, subtotal=0, and total=0.
+from decimal import Decimal
+
+import pytest
+
+from app.models.beer import Beer, BeerEventType
+from app.models.carts import Cart, CartItem
+from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
+from app.models.users import User
+from services.carts import format_cart
+from tests.test_beers import available_beer
+
+
+@pytest.fixture
+def cart():
+    return Cart(
+        id=1,
+        user_id=1,
+    )
+
+@pytest.fixture
+def cart_item_zero_amount():
+    return CartItem(
+        cart_id=1,
+        beer_id=1,
+        amount=0,
+    )
+
+@pytest.fixture
+def cart_item_positive_amount():
+    beer = Beer(
+        id=2,
+        name="Test Beer",
+        price=Decimal("10.00"),
+        image_url="/test.jpg",
+    )
+
+    return CartItem(
+        cart_id=1,
+        beer_id=2,
+        amount=3,
+        beer=beer,
+    )
+
+@pytest.mark.asyncio
+async def test_format_non_existing_cart_should_return_empty_cart():
+    result = await format_cart(None)
+
+    assert result == {
+        "id": None,
+        "cart_items": [],
+        "subtotal": 0,
+        "total": 0,
+    }
+
 
 # 2. Cart items formatting and totals
 # format_cart() should include only valid cart items.
