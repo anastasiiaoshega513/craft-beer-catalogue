@@ -1,4 +1,4 @@
-"""Database cleanup script for expired tokens and unactivated user accounts."""
+"""Database cleanup script for expired tokens and stale unactivated user accounts."""
 
 import asyncio
 
@@ -11,6 +11,7 @@ from db.engine import AsyncSessionLocal
 
 
 async def main() -> None:
+    """Run expired token and unactivated account cleanup in a database session."""
     async with AsyncSessionLocal() as db:
         try:
             await cleanup_expired_tokens(db)
