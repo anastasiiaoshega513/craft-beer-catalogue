@@ -18,6 +18,12 @@ from app.security.guest_user import GUEST_COOKIE, get_or_create_guest_id
 async def get_user_or_guest_cart(
     request: Request, user: User | None, db: AsyncSession
 ) -> Cart | None:
+    """
+    Return an existing cart for an authenticated user or guest.
+
+    This function is read-only. For guests without a guest_id cookie, it returns
+    None instead of creating a cookie or a new cart.
+    """
     stmt = select(Cart).options(
         selectinload(Cart.cart_items).selectinload(CartItem.beer)
     )
@@ -42,7 +48,11 @@ async def get_or_create_user_or_guest_cart(
     user: User | None,
     db: AsyncSession,
 ) -> Cart:
+    """
+    Return an existing cart or create one for an authenticated user or guest.
 
+    For guests, a guest_id cookie is created when it does not already exist.
+    """
     stmt = select(Cart)
 
     if user is None:
@@ -67,6 +77,13 @@ async def get_or_create_user_or_guest_cart(
 
 
 async def format_cart(cart: Cart | None) -> dict:
+    """
+    Build the cart response returned by the API.
+
+    Returns an empty cart response when the cart does not exist. Cart items with
+    non-positive amounts are ignored. The delivery fee is added only when the
+    cart contains valid items.
+    """
     if cart is None:
         return {
             "id": None,
@@ -107,6 +124,12 @@ async def format_cart(cart: Cart | None) -> dict:
 
 
 async def reload_and_format_cart(cart: Cart, db: AsyncSession) -> dict:
+    """
+    Reload a cart from the database and return its formatted response.
+
+    Used after cart changes to avoid formatting stale relationship data from the
+    current SQLAlchemy session.
+    """
     result = await db.execute(
         select(Cart)
         .options(selectinload(Cart.cart_items).selectinload(CartItem.beer))

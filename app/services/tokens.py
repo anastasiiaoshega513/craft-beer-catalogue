@@ -10,9 +10,16 @@ from app.models.users import User
 from app.services.users import utc_now_naive
 
 
-async def cleanup_expired_tokens(db: AsyncSession) -> None:
+async def cleanup_expired_auth_records(db: AsyncSession) -> None:
+    """
+    Delete expired authentication tokens and stale unactivated users.
+
+    Refresh and password reset tokens are removed as soon as they expire.
+    Unactivated users are removed only after their activation token has been
+    expired for more than one day.
+    """
     now = utc_now_naive()
-    yesterday = now - timedelta(days=1)
+    unactivated_user_cutoff = now - timedelta(days=1)
 
     await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < now))
     await db.execute(
@@ -24,7 +31,7 @@ async def cleanup_expired_tokens(db: AsyncSession) -> None:
         .join(ActivationToken)
         .where(
             User.is_active.is_(False),
-            ActivationToken.expires_at < yesterday,
+            ActivationToken.expires_at < unactivated_user_cutoff,
         )
     )
 

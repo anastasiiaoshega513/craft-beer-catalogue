@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class MessageResponseSchema(BaseModel):
