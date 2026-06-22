@@ -117,7 +117,6 @@ async def register_user(
 
     except ValueError as e:
         await db.rollback()
-
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=e.args[0],
@@ -332,8 +331,7 @@ async def update_me(
 
     except ValueError as e:
         await db.rollback()
-
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.args[0])
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.args[0])
 
     except SQLAlchemyError:
         await db.rollback()
@@ -482,6 +480,13 @@ async def password_reset_complete(
         user.password = data.password
         await db.delete(db_token)
         await db.commit()
+
+    except ValueError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=e.args[0],
+        )
 
     except SQLAlchemyError:
         await db.rollback()
