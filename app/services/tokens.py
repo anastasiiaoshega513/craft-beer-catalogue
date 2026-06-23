@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
 from app.models.users import User
-from app.services.users import utc_now_naive
 
 
 async def cleanup_expired_auth_records(db: AsyncSession) -> None:
@@ -18,7 +17,7 @@ async def cleanup_expired_auth_records(db: AsyncSession) -> None:
     Unactivated users are removed only after their activation token has been
     expired for more than one day.
     """
-    now = utc_now_naive()
+    now = datetime.now(timezone.utc)
     unactivated_user_cutoff = now - timedelta(days=1)
 
     await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < now))
