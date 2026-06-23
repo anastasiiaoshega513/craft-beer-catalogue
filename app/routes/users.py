@@ -331,7 +331,9 @@ async def update_me(
 
     except ValueError as e:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.args[0])
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.args[0]
+        )
 
     except SQLAlchemyError:
         await db.rollback()

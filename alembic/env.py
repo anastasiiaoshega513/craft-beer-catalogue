@@ -11,8 +11,10 @@ from db.engine import Base
 # access to the values within the .ini file in use.
 config = context.config
 
+
 def get_alembic_database_url() -> str:
     return DATABASE_URL.replace("+asyncpg", "+psycopg").replace("%", "%%")
+
 
 config.set_main_option("sqlalchemy.url", get_alembic_database_url())
 
