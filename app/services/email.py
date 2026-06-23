@@ -2,6 +2,7 @@
 
 import smtplib
 from email.message import EmailMessage
+from email.utils import formataddr
 
 from app import config
 
@@ -10,7 +11,7 @@ def send_email(recipient: str, subject: str, body: str) -> None:
     """Send a plain text email using the configured SMTP server."""
     message = EmailMessage()
 
-    message["From"] = config.SMTP_FROM_EMAIL
+    message["From"] = formataddr(("Beer Catalogue", config.SMTP_FROM_EMAIL))
     message["To"] = recipient
     message["Subject"] = subject
 
