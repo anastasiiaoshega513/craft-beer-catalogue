@@ -65,9 +65,7 @@ class User(Base):
     @property
     def password(self) -> None:
         """Prevent reading password values from the user model."""
-        raise AttributeError(
-            "Password is write-only. Use the setter to set the password."
-        )
+        raise AttributeError("Password is write-only. Use the setter to set the password.")
 
     @password.setter
     def password(self, raw_password: str) -> None:

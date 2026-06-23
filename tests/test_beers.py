@@ -34,8 +34,6 @@ def available_beer():
     )
 
 
-def test_beer_is_available_depends_on_total_amount_correctly(
-    not_available_beer, available_beer
-):
+def test_beer_is_available_depends_on_total_amount_correctly(not_available_beer, available_beer):
     assert not_available_beer.is_available is False
     assert available_beer.is_available is True

@@ -22,9 +22,7 @@ BEER_PAGE_SIZE = 6
     "/",
     response_model=BeerListSchema,
     summary="Get beer list",
-    description=(
-        "Return a paginated beer list with optional search, filtering, and sorting."
-    ),
+    description=("Return a paginated beer list with optional search, filtering, and sorting."),
 )
 async def get_beer_list(
     offset: int = Query(0, ge=0),
@@ -107,21 +105,15 @@ async def get_beer_list(
     responses={
         404: {
             "description": "Beer not found.",
-            "content": {
-                "application/json": {"example": {"detail": {"beer": "Beer not found"}}}
-            },
+            "content": {"application/json": {"example": {"detail": {"beer": "Beer not found"}}}},
         },
     },
 )
 async def get_beer_detail(beer_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id)
-    )
+    result = await db.execute(select(Beer).options(selectinload(Beer.event_types)).where(Beer.id == beer_id))
     beer = result.scalar_one_or_none()
 
     if beer is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail={"beer": "Beer not found"}
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"beer": "Beer not found"})
 
     return beer

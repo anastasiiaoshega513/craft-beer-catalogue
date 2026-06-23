@@ -15,18 +15,14 @@ from app.models.users import User
 from app.security.guest_user import GUEST_COOKIE, get_or_create_guest_id
 
 
-async def get_user_or_guest_cart(
-    request: Request, user: User | None, db: AsyncSession
-) -> Cart | None:
+async def get_user_or_guest_cart(request: Request, user: User | None, db: AsyncSession) -> Cart | None:
     """
     Return an existing cart for an authenticated user or guest.
 
     This function is read-only. For guests without a guest_id cookie, it returns
     None instead of creating a cookie or a new cart.
     """
-    stmt = select(Cart).options(
-        selectinload(Cart.cart_items).selectinload(CartItem.beer)
-    )
+    stmt = select(Cart).options(selectinload(Cart.cart_items).selectinload(CartItem.beer))
 
     if user:
         stmt = stmt.where(Cart.user_id == user.id)

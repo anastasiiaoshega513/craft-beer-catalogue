@@ -76,9 +76,7 @@ async def register_user(
     activation token after the previous activation token is removed.
     """
     result = await db.execute(
-        select(User)
-        .options(selectinload(User.activation_token))
-        .where(User.email == user_data.email.lower())
+        select(User).options(selectinload(User.activation_token)).where(User.email == user_data.email.lower())
     )
     existing_user = result.scalar_one_or_none()
 
@@ -142,9 +140,7 @@ async def register_user(
     summary="Activate Account",
     description="Activate a user account using an email activation token.",
 )
-async def activate_user(
-    activation_token: UserActivationSchema, db: AsyncSession = Depends(get_db)
-):
+async def activate_user(activation_token: UserActivationSchema, db: AsyncSession = Depends(get_db)):
     """
     Activate a user account using an activation token.
 
@@ -199,13 +195,10 @@ async def activate_user(
     response_model=AccessTokenSchema,
     summary="Log In",
     description=(
-        "Authenticate an active user, return an access token, "
-        "and store a refresh token in an HTTP-only cookie."
+        "Authenticate an active user, return an access token, " "and store a refresh token in an HTTP-only cookie."
     ),
 )
-async def login_user(
-    login_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)
-):
+async def login_user(login_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)):
     """
     Authenticate an active user and issue access and refresh tokens.
 
@@ -275,9 +268,7 @@ async def logout_user(
     Deletes all stored refresh tokens for the user and removes the refresh token
     cookie from the browser.
     """
-    await db.execute(
-        delete(RefreshToken).where(RefreshToken.user_id == current_user.id)
-    )
+    await db.execute(delete(RefreshToken).where(RefreshToken.user_id == current_user.id))
     await db.commit()
 
     response.delete_cookie(
@@ -330,9 +321,7 @@ async def update_me(
 
     except ValueError as e:
         await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.args[0]
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=e.args[0])
 
     except SQLAlchemyError:
         await db.rollback()
@@ -411,9 +400,7 @@ async def password_reset_request(
             "message": "You will receive an email with instructions to reset your password.",
         }
 
-    old_token_result = await db.execute(
-        select(PasswordResetToken).where(PasswordResetToken.user_id == user.id)
-    )
+    old_token_result = await db.execute(select(PasswordResetToken).where(PasswordResetToken.user_id == user.id))
     old_token = old_token_result.scalar_one_or_none()
 
     if old_token:
@@ -444,9 +431,7 @@ async def password_reset_request(
     summary="Complete Password Reset",
     description="Reset a user's password using a valid password reset token.",
 )
-async def password_reset_complete(
-    data: PasswordResetCompleteRequestSchema, db: AsyncSession = Depends(get_db)
-):
+async def password_reset_complete(data: PasswordResetCompleteRequestSchema, db: AsyncSession = Depends(get_db)):
     """
     Reset a user's password using a valid password reset token.
 

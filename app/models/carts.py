@@ -14,23 +14,17 @@ class CartItem(Base):
     __tablename__ = "cart_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    cart_id = Column(
-        Integer, ForeignKey("carts.id", ondelete="CASCADE"), nullable=False
-    )
+    cart_id = Column(Integer, ForeignKey("carts.id", ondelete="CASCADE"), nullable=False)
     beer_id = Column(Integer, ForeignKey("beers.id"), nullable=False)
     amount = Column(Integer, nullable=False, default=1)
 
     cart = relationship("Cart", back_populates="cart_items")
     beer = relationship("Beer")
 
-    __table_args__ = (
-        UniqueConstraint("cart_id", "beer_id", name="uq_cart_item_cart_id_beer_id"),
-    )
+    __table_args__ = (UniqueConstraint("cart_id", "beer_id", name="uq_cart_item_cart_id_beer_id"),)
 
     def __repr__(self) -> str:
-        return (
-            f"<CartItem(id={self.id}, cart_id={self.cart_id}, beer_id={self.beer_id})>"
-        )
+        return f"<CartItem(id={self.id}, cart_id={self.cart_id}, beer_id={self.beer_id})>"
 
 
 class Cart(Base):
@@ -51,9 +45,5 @@ class Cart(Base):
     )
 
     def __repr__(self) -> str:
-        owner = (
-            f"user_id={self.user_id}"
-            if self.user_id is not None
-            else f"guest_id={self.guest_id}"
-        )
+        owner = f"user_id={self.user_id}" if self.user_id is not None else f"guest_id={self.guest_id}"
         return f"<Cart(id={self.id}, {owner})>"

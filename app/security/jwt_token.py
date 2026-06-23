@@ -28,9 +28,7 @@ class JWTAuthManager:
         self._secret_key_access = secret_key_access
         self._secret_key_refresh = secret_key_refresh
 
-    def _create_token(
-        self, data: dict, secret_key: str, expires_delta: timedelta
-    ) -> str:
+    def _create_token(self, data: dict, secret_key: str, expires_delta: timedelta) -> str:
         """Create a signed JWT with an expiration claim."""
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + expires_delta
@@ -56,9 +54,7 @@ class JWTAuthManager:
     def decode_access_token(self, token: str) -> dict:
         """Decode and validate an access token."""
         try:
-            return jwt.decode(
-                token, self._secret_key_access, algorithms=[self._ALGORITHM]
-            )
+            return jwt.decode(token, self._secret_key_access, algorithms=[self._ALGORITHM])
         except ExpiredSignatureError:
             raise TokenExpiredError()
         except JWTError:
@@ -67,9 +63,7 @@ class JWTAuthManager:
     def decode_refresh_token(self, token: str) -> dict:
         """Decode and validate a refresh token."""
         try:
-            return jwt.decode(
-                token, self._secret_key_refresh, algorithms=[self._ALGORITHM]
-            )
+            return jwt.decode(token, self._secret_key_refresh, algorithms=[self._ALGORITHM])
         except ExpiredSignatureError:
             raise TokenExpiredError()
         except JWTError:
