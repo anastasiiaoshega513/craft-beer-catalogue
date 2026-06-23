@@ -37,7 +37,6 @@ from app.services.users import (
     internal_server_error,
     invalid_refresh_token_exception,
     invalid_reset_token_exception,
-    utc_now_naive,
 )
 from db.dependencies import get_db
 
@@ -166,7 +165,7 @@ async def activate_user(
             detail={"activation_token": "Invalid activation token."},
         )
 
-    if activation_token_db.expires_at < utc_now_naive():
+    if activation_token_db.expires_at < datetime.now(timezone.utc):
         await db.delete(activation_token_db)
         await db.commit()
 
@@ -464,7 +463,7 @@ async def password_reset_complete(
     if not db_token:
         raise invalid_reset_token_exception()
 
-    if db_token.expires_at < utc_now_naive():
+    if db_token.expires_at < datetime.now(timezone.utc):
         await db.delete(db_token)
         await db.commit()
 

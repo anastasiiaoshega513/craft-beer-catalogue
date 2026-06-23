@@ -31,11 +31,6 @@ def invalid_reset_token_exception() -> HTTPException:
     )
 
 
-def utc_now_naive() -> datetime:
-    """Return the current UTC datetime without timezone info for database comparisons."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
-
-
 def internal_server_error(message: str) -> HTTPException:
     """Build a 500 error response with a server_error detail message."""
     return HTTPException(
