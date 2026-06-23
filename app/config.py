@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DATABASE_URL = os.environ["DATABASE_URL"]
+
 SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "1025"))
 
