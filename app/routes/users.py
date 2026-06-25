@@ -248,8 +248,8 @@ async def login_user(
         value=refresh_token,
         max_age=REFRESH_TOKEN_COOKIE_MAX_AGE,
         httponly=True,
-        samesite="lax",
-        secure=False,  # TODO change to True when we deploy
+        samesite="none",
+        secure=True,
     )
 
     return {
@@ -283,8 +283,8 @@ async def logout_user(
     response.delete_cookie(
         key=REFRESH_TOKEN_COOKIE,
         httponly=True,
-        samesite="lax",
-        secure=False,  # TODO change to True when we deploy
+        samesite="none",
+        secure=True,
     )
 
     return {
