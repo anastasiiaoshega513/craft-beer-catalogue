@@ -37,7 +37,7 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: sqlite:///./test.db
+          DATABASE_URL: sqlite+aiosqlite:///./test.db
           JWT_ACCESS_SECRET_KEY: test_access_secret
           JWT_REFRESH_SECRET_KEY: test_refresh_secret
         run: pytest
