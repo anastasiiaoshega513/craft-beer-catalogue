@@ -20,9 +20,7 @@ class BeerEventType(Base):
 
     __tablename__ = "beer_event_types"
 
-    beer_id = Column(
-        Integer, ForeignKey("beers.id", ondelete="CASCADE"), primary_key=True
-    )
+    beer_id = Column(Integer, ForeignKey("beers.id", ondelete="CASCADE"), primary_key=True)
     event_type = Column(Enum(EventTypeEnum), primary_key=True, nullable=False)
 
     beer = relationship("Beer", back_populates="event_types")
@@ -34,9 +32,7 @@ class BeerEventType(Base):
 class Beer(Base):
     __tablename__ = "beers"
 
-    __table_args__ = (
-        CheckConstraint("total_amount >= 0", name="check_total_amount_non_negative"),
-    )
+    __table_args__ = (CheckConstraint("total_amount >= 0", name="check_total_amount_non_negative"),)
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, unique=True)

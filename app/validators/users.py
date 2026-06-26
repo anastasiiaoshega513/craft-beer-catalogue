@@ -33,9 +33,7 @@ def validate_password_strength(password: str) -> str:
 def validate_email(user_email: str) -> str:
     """Normalize and validate an email address."""
     try:
-        email_info = email_validator.validate_email(
-            user_email, check_deliverability=False
-        )
+        email_info = email_validator.validate_email(user_email, check_deliverability=False)
         email = email_info.normalized
     except email_validator.EmailNotValidError:
         raise ValueError({"email": "Invalid email address."})

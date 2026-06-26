@@ -25,6 +25,7 @@ app.include_router(users_router)
 app.include_router(carts_router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}

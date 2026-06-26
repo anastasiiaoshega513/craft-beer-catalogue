@@ -1,6 +1,6 @@
 """Cleanup helpers for expired tokens and stale unactivated accounts."""
 
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,9 +21,7 @@ async def cleanup_expired_auth_records(db: AsyncSession) -> None:
     unactivated_user_cutoff = now - timedelta(days=1)
 
     await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < now))
-    await db.execute(
-        delete(PasswordResetToken).where(PasswordResetToken.expires_at < now)
-    )
+    await db.execute(delete(PasswordResetToken).where(PasswordResetToken.expires_at < now))
 
     result = await db.execute(
         select(User)

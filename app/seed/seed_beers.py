@@ -40,8 +40,7 @@ async def seed_beers() -> None:
                 total_amount=item["total_amount"],
             )
             beer.event_types = [
-                BeerEventType(event_type=EventTypeEnum(event_type))
-                for event_type in item.get("event_types", [])
+                BeerEventType(event_type=EventTypeEnum(event_type)) for event_type in item.get("event_types", [])
             ]
             session.add(beer)
 

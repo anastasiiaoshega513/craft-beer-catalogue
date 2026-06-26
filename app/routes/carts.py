@@ -80,13 +80,9 @@ async def add_cart_item(
             detail={"beer_id": "Beer is out of stock."},
         )
 
-    cart = await get_or_create_user_or_guest_cart(
-        request=request, user=user, db=db, response=response
-    )
+    cart = await get_or_create_user_or_guest_cart(request=request, user=user, db=db, response=response)
 
-    result = await db.execute(
-        select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id)
-    )
+    result = await db.execute(select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id))
     cart_item = result.scalar_one_or_none()
 
     if cart_item is None:
@@ -140,10 +136,7 @@ async def clear_cart(
     "/{item_id}/",
     response_model=CartSchema,
     summary="Decrease cart item quantity",
-    description=(
-        "Decrease a cart item quantity by one. Deletes the cart item when "
-        "its quantity reaches zero."
-    ),
+    description=("Decrease a cart item quantity by one. Deletes the cart item when " "its quantity reaches zero."),
     responses={
         404: {"description": "Cart or cart item not found."},
     },

@@ -29,13 +29,9 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column("price", sa.Numeric(precision=10, scale=2), nullable=False),
         sa.Column("image_url", sa.String(), nullable=True),
-        sa.Column(
-            "alcohol_percentage", sa.Numeric(precision=4, scale=2), nullable=False
-        ),
+        sa.Column("alcohol_percentage", sa.Numeric(precision=4, scale=2), nullable=False),
         sa.Column("is_filtered", sa.Boolean(), nullable=False),
-        sa.Column(
-            "beer_type", sa.Enum("DARK", "LIGHT", name="beertypeenum"), nullable=False
-        ),
+        sa.Column("beer_type", sa.Enum("DARK", "LIGHT", name="beertypeenum"), nullable=False),
         sa.Column("volume", sa.Integer(), nullable=False),
         sa.Column("total_amount", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id"),

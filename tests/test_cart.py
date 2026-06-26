@@ -60,18 +60,14 @@ async def test_format_non_existing_cart_should_return_empty_cart():
 
 
 @pytest.mark.asyncio
-async def test_cart_items_and_totals_are_formatted_correctly(
-    cart, cart_item_positive_amount, cart_item_zero_amount
-):
+async def test_cart_items_and_totals_are_formatted_correctly(cart, cart_item_positive_amount, cart_item_zero_amount):
     cart.cart_items = [
         cart_item_positive_amount,
         cart_item_zero_amount,
     ]
     result = await format_cart(cart)
 
-    expected_subtotal = (
-        cart_item_positive_amount.beer.price * cart_item_positive_amount.amount
-    )
+    expected_subtotal = cart_item_positive_amount.beer.price * cart_item_positive_amount.amount
 
     returned_item_ids = [item["id"] for item in result["cart_items"]]
 
