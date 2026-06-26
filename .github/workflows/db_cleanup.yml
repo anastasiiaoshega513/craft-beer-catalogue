@@ -28,4 +28,4 @@ jobs:
       - name: Run database cleanup
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python scripts/cleanup_db.py
+        run: python app/scripts/cleanup_db.py
