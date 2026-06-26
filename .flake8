@@ -19,3 +19,4 @@ extend-ignore =
 per-file-ignores =
     app/scripts/cleanup_db.py:F401
     */__init__.py:F401
+    tests/*.py:F401
