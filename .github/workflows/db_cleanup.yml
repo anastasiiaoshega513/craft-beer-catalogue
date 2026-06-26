@@ -28,4 +28,6 @@ jobs:
       - name: Run database cleanup
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_ACCESS_SECRET_KEY: test_access_secret
+          JWT_REFRESH_SECRET_KEY: test_refresh_secret
         run: python -m app.scripts.cleanup_db
