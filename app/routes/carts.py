@@ -9,6 +9,8 @@ from app.models.users import User
 from app.schemas.carts import CartSchema
 from app.services.carts import (
     format_cart,
+    get_cart_item_or_404,
+    get_cart_or_404,
     get_or_create_user_or_guest_cart,
     get_user_or_guest_cart,
     reload_and_format_cart,
@@ -45,7 +47,7 @@ async def get_cart(
     response_model=CartSchema,
     summary="Add beer to cart",
     description=(
-        "Add one beer item to the current cart. Creates a guest cart and guest_id "
+        "Add one or more beers to the current cart. Creates a guest cart and guest_id "
         "cookie when the user is not authenticated and no guest cart exists."
     ),
     responses={
@@ -53,7 +55,7 @@ async def get_cart(
         409: {"description": "Beer is out of stock or requested amount exceeds stock."},
     },
 )
-async def add_cart_item(
+async def add_beer_cart(
     beer_id: int,
     request: Request,
     response: Response,
@@ -62,9 +64,12 @@ async def add_cart_item(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Add one beer to the user's or guest's cart.
+    Add one or more beers to the user's or guest's cart.
 
-    Checks beer existence and stock before creating or updating a cart item.
+    The quantity parameter defines how many items of the selected beer should be
+    added to the cart. If quantity is not provided, one item is added by default.
+
+    Checks beer existence and available stock before creating or updating a cart item.
     """
     result = await db.execute(select(Beer).where(Beer.id == beer_id))
     beer = result.scalar_one_or_none()
@@ -88,7 +93,7 @@ async def add_cart_item(
 
     if cart_item is None:
 
-        if beer.total_amount <= quantity:
+        if beer.total_amount < quantity:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"beer_id": "Not enough beer in stock."},
@@ -99,13 +104,57 @@ async def add_cart_item(
         await db.flush()
 
     else:
-        if cart_item.amount + quantity >= beer.total_amount:
+        if cart_item.amount + quantity > beer.total_amount:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"beer_id": "Not enough beer in stock."},
             )
 
         cart_item.amount += quantity
+
+    await db.commit()
+    return await reload_and_format_cart(cart=cart, db=db)
+
+
+@router.patch(
+    "/{item_id}/",
+    response_model=CartSchema,
+    summary="Set cart item quantity",
+    description="Set the exact quantity for a cart item. Deletes the cart item when its quantity reaches zero.",
+    responses={
+        404: {"description": "Cart or cart item not found."},
+        409: {"description": "Beer is out of stock or requested amount exceeds stock."},
+    },
+)
+async def set_cart_item_quantity(
+    item_id: int,
+    request: Request,
+    quantity: int = Query(..., ge=0),
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Set the exact quantity for a cart item.
+
+    The quantity parameter represents the final desired amount of this item in the cart,
+    not the amount to add or remove.
+
+    If quantity is zero, the cart item is removed.
+    Checks that the requested quantity does not exceed available stock.
+    """
+    cart = await get_cart_or_404(request=request, user=user, db=db)
+    cart_item = await get_cart_item_or_404(item_id=item_id, cart_id=cart.id, db=db, load_beer=True)
+
+    cart_item.amount = quantity
+
+    if cart_item.amount <= 0:
+        await db.delete(cart_item)
+
+    if cart_item.amount > cart_item.beer.total_amount:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"beer_id": "Not enough beer in stock."},
+        )
 
     await db.commit()
     return await reload_and_format_cart(cart=cart, db=db)
@@ -125,13 +174,7 @@ async def clear_cart(
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
+    cart = await get_cart_or_404(request=request, user=user, db=db)
 
     for item in cart.cart_items:
         await db.delete(item)
@@ -144,7 +187,7 @@ async def clear_cart(
     "/{item_id}/",
     response_model=CartSchema,
     summary="Decrease cart item quantity",
-    description=("Decrease a cart item quantity by one. Deletes the cart item when " "its quantity reaches zero."),
+    description="Decrease a cart item quantity by one. Deletes the cart item when its quantity reaches zero.",
     responses={
         404: {"description": "Cart or cart item not found."},
     },
@@ -155,27 +198,13 @@ async def remove_cart_item(
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+    """
+    Decrease a cart item quantity by one.
 
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
-
-    result = await db.execute(
-        select(CartItem).where(
-            CartItem.id == item_id,
-            CartItem.cart_id == cart.id,
-        )
-    )
-    cart_item = result.scalar_one_or_none()
-
-    if cart_item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"item_id": "Item not found."},
-        )
+    If the cart item quantity reaches zero, the item is removed from the cart.
+    """
+    cart = await get_cart_or_404(request=request, user=user, db=db)
+    cart_item = await get_cart_item_or_404(item_id=item_id, cart_id=cart.id, db=db)
 
     cart_item.amount -= 1
 
