@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,6 +57,7 @@ async def add_cart_item(
     beer_id: int,
     request: Request,
     response: Response,
+    quantity: int = Query(1, ge=1),
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
@@ -86,18 +87,25 @@ async def add_cart_item(
     cart_item = result.scalar_one_or_none()
 
     if cart_item is None:
-        cart_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=1)
-        db.add(cart_item)
-        await db.flush()
 
-    else:
-        if cart_item.amount >= beer.total_amount:
+        if beer.total_amount <= quantity:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"beer_id": "Not enough beer in stock."},
             )
 
-        cart_item.amount += 1
+        cart_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=quantity)
+        db.add(cart_item)
+        await db.flush()
+
+    else:
+        if cart_item.amount + quantity >= beer.total_amount:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"beer_id": "Not enough beer in stock."},
+            )
+
+        cart_item.amount += quantity
 
     await db.commit()
     return await reload_and_format_cart(cart=cart, db=db)
