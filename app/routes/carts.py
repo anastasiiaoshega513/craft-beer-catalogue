@@ -45,7 +45,7 @@ async def get_cart(
     response_model=CartSchema,
     summary="Add beer to cart",
     description=(
-        "Add one beer item to the current cart. Creates a guest cart and guest_id "
+        "Add one or more beers to the current cart. Creates a guest cart and guest_id "
         "cookie when the user is not authenticated and no guest cart exists."
     ),
     responses={
@@ -62,9 +62,12 @@ async def add_cart_item(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Add one beer to the user's or guest's cart.
+    Add one or more beers to the user's or guest's cart.
 
-    Checks beer existence and stock before creating or updating a cart item.
+    The quantity parameter defines how many items of the selected beer should be
+    added to the cart. If quantity is not provided, one item is added by default.
+
+    Checks beer existence and available stock before creating or updating a cart item.
     """
     result = await db.execute(select(Beer).where(Beer.id == beer_id))
     beer = result.scalar_one_or_none()
@@ -109,6 +112,30 @@ async def add_cart_item(
 
     await db.commit()
     return await reload_and_format_cart(cart=cart, db=db)
+
+
+@router.patch(
+    "/{beer_id}/",
+    response_model=CartSchema,
+    summary="Add beer to cart",
+    description=(
+        "Add one beer item to the current cart. Creates a guest cart and guest_id "
+        "cookie when the user is not authenticated and no guest cart exists."
+    ),
+    responses={
+        404: {"description": "Beer not found."},
+        409: {"description": "Beer is out of stock or requested amount exceeds stock."},
+    },
+)
+async def add_cart_item(
+    beer_id: int,
+    request: Request,
+    response: Response,
+    quantity: int = Query(1, ge=1),
+    user: User | None = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    pass
 
 
 @router.delete(
