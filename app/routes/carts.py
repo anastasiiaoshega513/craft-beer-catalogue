@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.dependencies.users import get_current_user_optional
 from app.models.beer import Beer
@@ -10,9 +9,11 @@ from app.models.users import User
 from app.schemas.carts import CartSchema
 from app.services.carts import (
     format_cart,
+    get_cart_item_or_404,
+    get_cart_or_404,
     get_or_create_user_or_guest_cart,
     get_user_or_guest_cart,
-    reload_and_format_cart, get_cart_or_404,
+    reload_and_format_cart,
 )
 from db.dependencies import get_db
 
@@ -54,7 +55,7 @@ async def get_cart(
         409: {"description": "Beer is out of stock or requested amount exceeds stock."},
     },
 )
-async def add_cart_item(
+async def add_beer_cart(
     beer_id: int,
     request: Request,
     response: Response,
@@ -142,22 +143,7 @@ async def set_cart_item_quantity(
     Checks that the requested quantity does not exceed available stock.
     """
     cart = await get_cart_or_404(request=request, user=user, db=db)
-
-    result = await db.execute(
-        select(CartItem)
-        .where(
-            CartItem.id == item_id,
-            CartItem.cart_id == cart.id,
-        )
-        .options(selectinload(CartItem.beer))
-    )
-    cart_item = result.scalar_one_or_none()
-
-    if cart_item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"item_id": "Item not found."},
-        )
+    cart_item = await get_cart_item_or_404(item_id=item_id, cart_id=cart.id, db=db, load_beer=True)
 
     cart_item.amount = quantity
 
@@ -218,20 +204,7 @@ async def remove_cart_item(
     If the cart item quantity reaches zero, the item is removed from the cart.
     """
     cart = await get_cart_or_404(request=request, user=user, db=db)
-
-    result = await db.execute(
-        select(CartItem).where(
-            CartItem.id == item_id,
-            CartItem.cart_id == cart.id,
-        )
-    )
-    cart_item = result.scalar_one_or_none()
-
-    if cart_item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"item_id": "Item not found."},
-        )
+    cart_item = await get_cart_item_or_404(item_id=item_id, cart_id=cart.id, db=db)
 
     cart_item.amount -= 1
 
