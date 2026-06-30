@@ -5,7 +5,7 @@ cookie. Read-only cart lookup does not create a cookie or a cart; creation happe
 only when a cart is needed for a write operation.
 """
 
-from fastapi import Request, Response
+from fastapi import Request, Response, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -136,3 +136,19 @@ async def reload_and_format_cart(cart: Cart, db: AsyncSession) -> dict:
     fresh_cart = result.scalar_one_or_none()
 
     return await format_cart(fresh_cart)
+
+
+async def get_cart_or_404(
+    request: Request,
+    user: User | None,
+    db: AsyncSession,
+):
+    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
+
+    if cart is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"cart_id": "Cart not found."},
+        )
+
+    return cart

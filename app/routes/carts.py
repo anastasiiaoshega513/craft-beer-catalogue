@@ -12,7 +12,7 @@ from app.services.carts import (
     format_cart,
     get_or_create_user_or_guest_cart,
     get_user_or_guest_cart,
-    reload_and_format_cart,
+    reload_and_format_cart, get_cart_or_404,
 )
 from db.dependencies import get_db
 
@@ -141,13 +141,7 @@ async def set_cart_item_quantity(
     If quantity is zero, the cart item is removed.
     Checks that the requested quantity does not exceed available stock.
     """
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
+    cart = await get_cart_or_404(request=request, user=user, db=db)
 
     result = await db.execute(
         select(CartItem)
@@ -194,13 +188,7 @@ async def clear_cart(
     user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
+    cart = await get_cart_or_404(request=request, user=user, db=db)
 
     for item in cart.cart_items:
         await db.delete(item)
@@ -229,13 +217,7 @@ async def remove_cart_item(
 
     If the cart item quantity reaches zero, the item is removed from the cart.
     """
-    cart = await get_user_or_guest_cart(request=request, user=user, db=db)
-
-    if cart is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"cart_id": "Cart not found."},
-        )
+    cart = await get_cart_or_404(request=request, user=user, db=db)
 
     result = await db.execute(
         select(CartItem).where(
