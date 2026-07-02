@@ -4,10 +4,7 @@ import re
 
 import email_validator
 
-
-NAME_REGEX = re.compile(
-    r"^(?!-)(?!.*[ '-]{2})(?=(?:.*[A-Za-z]){2,})[A-Za-z '-]+(?<![ -])$"
-)
+NAME_REGEX = re.compile(r"^(?!-)(?!.*[ '-]{2})(?=(?:.*[A-Za-z]){2,})[A-Za-z '-]+(?<![ -])$")
 
 
 def validate_password_strength(password: str) -> str:
@@ -55,8 +52,8 @@ def validate_name(name: str, field_name: str) -> str:
         raise ValueError(
             {
                 field_name: "Name must contain only Latin letters, spaces, hyphens, and apostrophes; "
-                            "must be at least 2 letters long; and cannot start/end with a hyphen "
-                            "or contain consecutive special characters."
+                "must be at least 2 letters long; and cannot start/end with a hyphen "
+                "or contain consecutive special characters."
             }
         )
     return name

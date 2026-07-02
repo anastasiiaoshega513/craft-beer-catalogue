@@ -9,6 +9,7 @@ from fastapi import (
     Response,
     status,
 )
+from models.users import User
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,7 +39,6 @@ from app.services.users import (
     invalid_reset_token_exception,
 )
 from db.dependencies import get_db
-from models.users import User
 
 router = APIRouter(
     prefix="/users",
