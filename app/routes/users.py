@@ -39,6 +39,7 @@ from app.services.users import (
     invalid_reset_token_exception,
 )
 from db.dependencies import get_db
+from models.users import User
 
 router = APIRouter(
     prefix="/users",
@@ -463,6 +464,12 @@ async def password_reset_complete(data: PasswordResetCompleteRequestSchema, db: 
         await db.commit()
 
         raise invalid_reset_token_exception()
+
+    if user.verify_password(data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"password": "New password must be different from the current password."},
+        )
 
     try:
         user.password = data.password
