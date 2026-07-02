@@ -9,6 +9,7 @@ from fastapi import (
     Response,
     status,
 )
+from models.users import User
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +18,6 @@ from sqlalchemy.orm import selectinload
 from app import config
 from app.dependencies.users import get_current_user
 from app.models.tokens import ActivationToken, PasswordResetToken, RefreshToken
-from app.models.users import User
 from app.schemas.users import (
     AccessTokenSchema,
     MessageResponseSchema,
@@ -463,6 +463,12 @@ async def password_reset_complete(data: PasswordResetCompleteRequestSchema, db: 
         await db.commit()
 
         raise invalid_reset_token_exception()
+
+    if user.verify_password(data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"password": "New password must be different from the current password."},
+        )
 
     try:
         user.password = data.password

@@ -91,25 +91,20 @@ async def add_beer_cart(
     result = await db.execute(select(CartItem).where(CartItem.beer_id == beer_id, CartItem.cart_id == cart.id))
     cart_item = result.scalar_one_or_none()
 
+    current_cart_amount = cart_item.amount if cart_item else 0
+    available_to_add = beer.total_amount - current_cart_amount
+
+    if quantity > available_to_add:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"beer_id": "Not enough beer in stock."},
+        )
+
     if cart_item is None:
-
-        if beer.total_amount < quantity:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"beer_id": "Not enough beer in stock."},
-            )
-
         cart_item = CartItem(beer_id=beer_id, cart_id=cart.id, amount=quantity)
         db.add(cart_item)
         await db.flush()
-
     else:
-        if cart_item.amount + quantity > beer.total_amount:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"beer_id": "Not enough beer in stock."},
-            )
-
         cart_item.amount += quantity
 
     await db.commit()
