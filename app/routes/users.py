@@ -9,7 +9,7 @@ from fastapi import (
     Response,
     status,
 )
-from models.users import User
+from app.models.users import User
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
