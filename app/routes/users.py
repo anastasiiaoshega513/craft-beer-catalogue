@@ -464,6 +464,12 @@ async def password_reset_complete(data: PasswordResetCompleteRequestSchema, db: 
 
         raise invalid_reset_token_exception()
 
+    if user.verify_password(data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"password": "New password must be different from the current password."},
+        )
+
     try:
         user.password = data.password
         await db.delete(db_token)
