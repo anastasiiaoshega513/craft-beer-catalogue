@@ -412,9 +412,7 @@ async def password_reset_request(
     await db.commit()
     await db.refresh(password_reset_token)
 
-    password_reset_link = (
-        f"{config.FRONTEND_URL}/password-reset-complete/?token={password_reset_token.token}"
-    )
+    password_reset_link = f"{config.FRONTEND_URL}/password-reset-complete/?token={password_reset_token.token}"
 
     background_tasks.add_task(
         send_password_reset_email,
