@@ -123,7 +123,7 @@ async def register_user(
         await db.rollback()
         raise internal_server_error("An error occurred during user creation.")
 
-    activation_link = f"{config.FRONTEND_URL}/beer-catalogue/activate/?token={activation_token.token}"
+    activation_link = f"{config.FRONTEND_URL}/activate/?token={activation_token.token}"
 
     background_tasks.add_task(
         send_activation_email,
@@ -413,7 +413,7 @@ async def password_reset_request(
     await db.refresh(password_reset_token)
 
     password_reset_link = (
-        f"{config.FRONTEND_URL}/beer-catalogue/password-reset-complete/?token={password_reset_token.token}"
+        f"{config.FRONTEND_URL}/password-reset-complete/?token={password_reset_token.token}"
     )
 
     background_tasks.add_task(
